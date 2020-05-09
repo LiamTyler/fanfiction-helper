@@ -1,182 +1,16 @@
 import requests
 import time
 import pickle
+from story import *
+
+story_links = []
+story_descs = []
 
 def WriteToFile( x, fname ):
     file = open( fname, "w" )
     lines = x.split( '\n' )
     for l in lines:
         file.write( l + "\n" )
-
-
-def ParseStoryDescKeyNumVal( desc, key, startPos = 0, endMarker = ' ' ):
-    start = desc.find( key, startPos )
-    if start == -1:
-        return [ 0, startPos ]
-    else:
-        start += len( key )
-    pos = desc.find( endMarker, start )
-    s = desc[start : pos]
-    s = s.replace( ',', '')
-    return [ int( s ), pos ]
-
-
-class Story:
-    def __init__( self ):
-        self.title        = ""
-        self.rating       = ""
-        self.words        = 0
-        self.language     = ""
-        self.author       = ""
-        self.author_link  = ""
-        self.description  = ""
-        self.story_link   = ""
-        self.story_id     = ""
-        self.genres       = []
-        self.characters   = []
-        self.pairings     = []
-        self.complete     = False
-        self.numReviews   = 0
-        self.numFavorites = 0
-        self.numFollows   = 0
-        self.numChapters  = 0
-        self.updateDate   = 0
-        self.publishDate  = 0
-        self._identifier  = ""
-        
-
-    def Parse( self, titleSection, descSection ):
-        # story_link
-        pos = titleSection.find( "class=stitle")
-        start = titleSection.find( '"', pos ) + 1
-        pos = titleSection.find( '"><img', start )
-        self.story_link = titleSection[start : pos]
-        self.story_id = self.story_link[3:self.story_link.find( '/', 3 )]
-
-        # title
-        start = titleSection.find( '>', pos + 2 ) + 1
-        pos = titleSection.find( '</a>', start )
-        self.title = titleSection[start : pos]
-
-        # author_link
-        pos = titleSection.find( 'by <a href="', pos )
-        start = titleSection.find( '"', pos ) + 1
-        pos = titleSection.find( '>', pos )
-        self.author_link = titleSection[start : pos]
-
-        #author
-        start = pos + 1
-        pos = titleSection.find( '</a>', pos )
-        self.author = titleSection[start : pos]
-
-        # description
-        start = descSection.find( '>' ) + 1
-        pos = descSection.find( '<div class', start )
-        self.description = descSection[start : pos]
-
-        # rating
-        start = descSection.find( "Rated: ", pos ) + len( "Rated: " )
-        pos = descSection.find( ' ', start )
-        self.rating = descSection[start : pos]
-
-        # language
-        start = pos + 3
-        pos = descSection.find( ' ', start )
-        self.language = descSection[start : pos]
-
-        # genres
-        chap_start = descSection.find( "Chapters", pos )
-        if chap_start != pos + 3:
-            genresStr = descSection[pos + 3 : chap_start - 3]
-            genres = genresStr.split('/')
-            for genre in genres:
-                if genre == "Comfort":
-                    continue
-                if genre == "Hurt":
-                    self.genres.append( "Hurt/Comfort" )
-                else:
-                    self.genres.append( genre )
-
-        [ self.numChapters, pos ]  = ParseStoryDescKeyNumVal( descSection, "Chapters: ", pos )
-        [ self.words, pos ]        = ParseStoryDescKeyNumVal( descSection, "Words: ", pos )
-        [ self.numReviews, pos ]   = ParseStoryDescKeyNumVal( descSection, "Reviews: ", pos )
-        [ self.numFavorites, pos ] = ParseStoryDescKeyNumVal( descSection, "Favs: ", pos )
-        [ self.numFollows, pos ]   = ParseStoryDescKeyNumVal( descSection, "Follows: ", pos )
-        [ self.updateDate, pos ]   = ParseStoryDescKeyNumVal( descSection, "Updated: <span data-xutime='", pos, "'" )
-        [ self.publishDate, pos ]  = ParseStoryDescKeyNumVal( descSection, "Published: <span data-xutime='", pos, "'" )
-        if self.updateDate == 0:
-            self.updateDate = self.publishDate
-
-        # complete
-        completePos = descSection.find( " - Complete", pos )
-        self.complete = completePos != -1
-        self._identifier = self.title + "_" + self.author + "_" + self.story_id
-
-        # characters
-        pos = descSection.find( "</span>", pos ) + len( "</span>" )
-        if not self.complete and descSection[pos] != ' ':
-            return
-        if self.complete and completePos == pos:
-            return
-        pos += 3
-        end = descSection.find( "</div>", pos )
-        if self.complete:
-            end = completePos
-
-        characterStr = descSection[pos : end]
-        s = characterStr.split( "] [" )
-        hasPairings = characterStr.find( '[' ) != -1
-        for pair in s:
-            p = pair.replace( '[', '' )
-            p = pair.replace( ']', '' )
-            p = pair.split( ", " )
-            pairing = []
-            for c in p:
-                self.characters.append( c )
-                pairing.append( c )
-            if hasPairings:
-                self.pairings.append( pairing )
-
-
-    def __lt__( self, other ):
-        return self._identifier < other._identifier
-
-    def __eq__( self, other ):
-        return self._identifier == other._identifier
-
-    def __ne__( self, other ):
-        return not( self.__eq__( self, other ) )
-
-    def __repr__( self ):
-        g = "[]"
-        if len( self.genres ) == 1:
-            g = self.genres[0]
-        if len( self.genres ) > 1:
-            g = " & "
-            g = g.join( self.genres )
-        
-        s = "Title: " + self.title + ", Author: " + self.author
-        
-        """
-        "Title: " + self.title + '\n' + \
-            "Num Words: " + str( self.words ) + '\n' + \
-            "Num Chapters: " + str( self.numChapters ) + '\n' + \
-            "Num Reviews: " + str( self.numReviews ) + '\n' + \
-            "Num Favorites: " + str( self.numFavorites ) + '\n' + \
-            "Num Follows: " + str( self.numFollows ) + '\n' + \
-            "Rating: " + self.rating + '\n' + \
-            "Genres: " + g + '\n' + \
-            "Characters: " + str( self.characters ) + '\n' + \
-            "Pairings: " + str( self.pairings ) + '\n' + \
-            "Author: " + self.author + " -> " + self.author_link + '\n' + \
-            "Language: " + self.language + '\n' + \
-            "Story Link: " + self.story_link + '\n' + \
-            "Update Date: " + time.strftime( '%m/%d/%Y', time.localtime( self.updateDate ) ) + '\n' + \
-            "Publish Date: " + time.strftime( '%m/%d/%Y', time.localtime( self.publishDate ) ) + '\n' + \
-            "Description: " + self.description
-        """
-
-        return s
 
 class StoryDB:
     def __init__( self, stories = [] ):
@@ -213,59 +47,173 @@ class StoryDB:
         return present
 
     def Insert( self, story ):
-        [ present, index ] = self.BinarySearch( story )
-        if present:
-            return
-        self.stories = self.stories[:index] + [ story ] + self.stories[index:]
+        self.stories.append( story )
+        #[ present, index ] = self.BinarySearch( story )
+        #if present:
+        #    return
+        #self.stories = self.stories[:index] + [ story ] + self.stories[index:]
+
+    def Serialize( self, filename ):
+        with open( filename, "wb" ) as file:
+            pickle.dump( self.stories, file )
+    
+    def Deserialize( self, filename ):
+        with open( filename, "rb" ) as file:
+            self.stories = pickle.load( file )
         
 
-def ParsePage( text ):
+def ParsePage( text, characterDB ):
     lines = text.split( '\n' )
+    #global story_links, story_descs
     story_links = [ x for x in lines if "class='z-list" in x ]
     story_descs = [ x for x in lines if "class='z-indent" in x ]
 
     stories = []
     for i in range( len( story_links ) ):
         s = Story()
-        s.Parse(story_links[i], story_descs[i] )
+        s.Parse(story_links[i], story_descs[i], characterDB )
         stories.append( s )
 
     return stories
 
-def DownloadStories( baseUrl ):
-    storyDB = StoryDB()
-    for pageIndex in range( 3 ):
-        page = requests.get( baseUrl + "&p=" + str( pageIndex + 1 ) )
+def IsSlash( story ):
+    # Check for explicit male pairings
+    for pair in story.pairings:
+        numMales = 0
+        for characterIndex in pair:
+            numMales += story.characters[characterIndex].currentGender == 'M'
 
-        newStories = ParsePage( page.text )
-        if len( newStories ) == 0:
-            break
-        for story in newStories:
-            storyDB.Insert( story )
+        if numMales > 1:
+            story.isSlash = True
+            #print( "Story:", story.title, "is slash" )
+            return True
+
+    # if the genre is romance and every character is male, probably slash
+    numMales = 0
+    for char in story.characters:
+        numMales += char.currentGender == 'M'
+    if "Romance" in story.genres and numMales > 1 and numMales == len(story.characters):
+        #print( "Story:", story.title, "is Probably slash?" )
+        story.isSlash = True
+        return True
+
+    # check description for telling keywords without "no" or "not" in front of them
+    desc = story.description.lower()
+    keywords = ["yaoi", "slash", "mpreg", "m-preg"]
+    for keyword in keywords:
+        pos = desc.find( keyword )
+        if pos != -1:
+            if "no" not in desc[pos-5:pos]:
+                #print( "Story:", story.title, "is SUSPECTED slash" )
+                story.isSlash = True
+                return True
+
+    print( "Story:", story.title, "is NOT slash" )
+    return False
+
+def DownloadStories( baseUrl, characterDB, maxPages=100000 ):
+    storyDB  = StoryDB()
+    beginUrl = baseUrl
+    endUrl   = ""
+    if "www.fanfiction.net/community" in baseUrl:
+        i = len(baseUrl)
+        numForwardSlashes = 0
+        while numForwardSlashes != 6:
+            i -= 1
+            numForwardSlashes += baseUrl[i] == '/'
+        beginUrl = baseUrl[:i+1]
+        endUrl = baseUrl[baseUrl.find( '/', i+1):]
+    else:
+        beginUrl += "&p="
+
+    numStories = 0
+    numSlash = 0
+    page = 1
+    while page < maxPages:
+        print( "Parsing page: ", page )
+        url = beginUrl + str( page ) + endUrl
+        response = requests.get( url )
         
-        time.sleep( 0.800 )
-        print( "Parsing page: ", pageIndex )
+        # If the urls dont match, then you've requested beyond the last page of stories
+        if response.url != url:
+            break
+
+        newStories = ParsePage( response.text, characterDB )
+        numStories += len(newStories)
+        for story in newStories:
+            if not IsSlash( story ):
+                storyDB.Insert( story )
+            else:
+                numSlash += 1
+        
+        time.sleep( 1.000 )
+        page += 1
+
+    print( "Slash: " + str(numSlash) + "/" + str(numStories) )
 
     return storyDB
-    
 
-def SerializeStories( filename, stories ):
-    with open( filename, "wb" ) as file:
-        pickle.dump( stories, file )
+# returns dictionary is key = name (string), value = either M, F, or U (unknown) (char)
+def LoadCharacterDictionary( filename ):
+    db = dict()
+    file = open( filename, "r" )
+    for line in file:
+        endOfName = line.find( "\"", 1 )
+        name = line[1:endOfName]
+        gender = line[-2]
+        db[name] = gender
 
-def DeserializeStories( filename ):
-    stories = []
-    with open( filename, "rb" ) as file:
-        stories = pickle.load( file )
+    return db
 
-    return stories
 
-DOWNLOAD = False
+DOWNLOAD = True
 filename = "hp_stories.bin"
-stories = None
+#baseUrl  = "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10&len=10&_c1=6&_c2=9"
+baseUrl  = "https://www.fanfiction.net/community/Harry-and-Draco-s-Love-Shack/11605/99/0/1/0/0/0/0/" # gay
+#baseUrl  = "https://www.fanfiction.net/community/Harry-is-the-man-All-the-Best-of-Bashing-fics/108191/99/0/1/0/0/0/0/" # not gay
+
+storyDB = None
+characterDB = LoadCharacterDictionary( "Harry-Potter_Character_Genders.txt" )
+
+
 if DOWNLOAD:
-    stories = DownloadStories( "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10&len=10&_c1=6&_c2=9" )
-    SerializeStories( filename, stories.stories )
+    storyDB = DownloadStories( baseUrl, characterDB )
+    storyDB.Serialize( filename )
 else:
-    stories = StoryDB()
-    stories.stories = DeserializeStories( filename )
+    storyDB = StoryDB()
+    storyDB.Deserialize( filename )
+
+
+"""
+page = requests.get( baseUrl + "&p=" + str( 1 ) )
+newStories = ParsePage( page.text )
+
+
+pos += 3
+end = descSection.find( "</div>", pos )
+characterStr = descSection[pos:end]
+characterStr = characterStr.replace( "] ", "], " )
+characters = [ s.strip() for s in re.split( ',', characterStr ) ]
+inPairing = False
+currentPairing = []
+pairings = []
+listcharacters = []
+for character in characters:
+    name = character.strip()
+    print(name)
+    if character[0] == '[':
+        name = name[1:]
+        inPairing = True
+    print(name)
+    if character[-1] == ']':
+        name = name[:-1]
+        currentPairing.append( name )
+        pairings.append( currentPairing )
+        currentPairing = []
+        inPairing = False
+    print(name)
+
+    listcharacters.append( name )
+    if inPairing:
+        currentPairing.append( name )
+"""
