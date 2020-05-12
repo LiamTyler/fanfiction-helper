@@ -1,24 +1,23 @@
 import time
-import re
 
-def ParseStoryDescKeyNumVal( desc, key, startPos = 0, endMarker = ' ' ):
-    start = desc.find( key, startPos )
-    if start == -1:
-        return [ 0, startPos ]
-    else:
-        start += len( key )
-    pos = desc.find( endMarker, start )
-    s = desc[start : pos]
-    s = s.replace( ',', '')
-    return [ int( s ), pos ]
-
+# M = Male, F = Female, U = Unknown/Unimportant
+# Sometimes authors change character genders, which would be reflecte in currentGender (if parsed correctly)
 class Character:
     def __init__( self, name, originalGender='U', currentGender='U' ):
         self.name           = name
         self.originalGender = originalGender
-        # Some stories swap genders like a female harry potter.
-        # can often figure that out from the description
         self.currentGender  = currentGender
+
+def ParseStoryDescKeyNumVal( desc, key, startPos = 0, endMarker = ' ' ):
+        start = desc.find( key, startPos )
+        if start == -1:
+            return [ 0, startPos ]
+        else:
+            start += len( key )
+        pos = desc.find( endMarker, start )
+        s = desc[start : pos]
+        s = s.replace( ',', '')
+        return [ int( s ), pos ]  
 
 class Story:
     def __init__( self ):
@@ -43,7 +42,6 @@ class Story:
         self.updateDate   = 0
         self.publishDate  = 0
         self._identifier  = ""
-        
 
     def Parse( self, titleSection, descSection, characterDB={} ):
         # story_link
@@ -171,10 +169,7 @@ class Story:
             g = " & "
             g = g.join( self.genres )
         
-        #s = "Title: " + self.title + ", Author: " + self.author
-        s = "Title: " + self.title + '\n' + \
-            "Characters: " + str( self.characters ) + '\n' + \
-            "Pairings: " + str( self.pairings ) + '\n'
+        s = self.title
         
         """
         "Title: " + self.title + '\n' + \

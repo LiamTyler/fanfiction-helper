@@ -1,0 +1,65 @@
+False Negatives:
+---------------------------------------------------------
+Parsing page:  1
+	Freedom And Not Peace | Drama/Suspense
+        - first chap has slash keyword
+	Checkmating | Humor
+        - says harry/draco in first chap
+Parsing page:  2
+	And it's Taken me With it | Humor
+        - difficult: the author bio lists it as slash
+	Irrrevocable | Angst/Family
+        - desc = "Harry is contracted to marry Draco".
+Parsing page:  3
+	Here We Come a Wassailing | Romance
+        - difficult description, author bio maybe
+	Constantine's Heir | Drama/Suspense
+        - HPDM keyword
+        - Author bio (Cheryl Dyson) also mentions slash
+Parsing page:  4
+Parsing page:  5
+	Brigandage | Adventure
+        - desc "Mature content and threesome warning"
+        - bio (Cheryl Dyson)
+Parsing page:  6
+Parsing page:  7
+	Gold Tinted Spectacles | Fantasy/Drama
+        - Harry-Draco keyword
+        - first chap has "slash"
+	Keep Holding On | Fantasy/Drama
+        - HPDM keyword
+Parsing page:  8
+	A Muggle Thing | Humor
+        - author bio
+	It Can't Be Love | Drama/Angst
+        - HPDM keyword
+	50 Things Draco Malfoy's Not Allowed to Do | Humor
+        - impossible
+	Draco's Boy | Angst
+        - HPDM keyword
+        - first chap says slash
+	Elementals | Adventure/Romance
+        - HPDM keyword
+
+
+False Positives:
+------------------------------------
+Rule 3 (p29, s14): Not Another Second Chance Story
+Rule 3 (p32, s1): King and Queen: Stone and Snow
+Rule 3 (p38, s19): Harry's Last Hope
+Rule 3 (p41, s20): Across the Mirror
+Rule 3 (p43, s4): Returning
+Rule 3 (p44, s18): Harry Potter and the Heir of Voldemort
+Rule 2 (p47, s2): Saving Connor
+    - "eventual HPDM slash" --> not actually a false positive
+Rule 3 (p50, s2): Born of the Water Lily
+Rule 3 (p51, s0): The Time of Destiny
+Rule 3 (p57, s18): When Worlds Collide
+Rule 3 (p58, s7): The Girl in the Tower
+Rule 3 (p59, s7): Child of Darkness, Child of Light
+Rule 3 (p64, s21): Fire and Ice
+Rule 3 (p67, s13): History Repeats Itself
+
+Rule 3 (p68, s8): The Tangibility of Magic
+Rule 3 (p73, s11): WIZARDS DUEL--SIXTH YEAR
+Rule 3 (p74, s24): Inquiring Minds
