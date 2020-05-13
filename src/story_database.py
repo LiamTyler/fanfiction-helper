@@ -53,6 +53,11 @@ class StoryDB:
         with open( filename, "rb" ) as file:
             self.stories = pickle.load( file )
 
+def LoadStoryDB( filename ):
+    db = StoryDB()
+    db.Deserialize( filename )
+    return db
+
 # returns dictionary is key = name (string), value = either M, F, or U (unknown) (char)
 def LoadCharacterDictionary( filename ):
     db = dict()

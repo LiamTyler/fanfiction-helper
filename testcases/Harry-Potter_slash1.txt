@@ -1,0 +1,13 @@
+https://www.fanfiction.net/community/Harry-and-Draco-s-Love-Shack/11605/99/0/1/0/0/0/0/
+slash
+databases/Harry-Potter_Harry-and-Draco-s-Love-Shack.bin
+/s/2117919/1/The-Pumpkin-Juice-Incident
+
+Line 1: Link for download
+Line 2: Is this a slash or straight db
+Line 3: path to database
+Line 4 - first blank line or EOF: Stories that shouldnt be tested
+Line after blank line: Not parsed. Can add comments, like these Line explanations
+
+Exception reasons:
+The-Pumpkin-Juice-Incident: Femslash

@@ -1,0 +1,25 @@
+https://www.fanfiction.net/community/Order-of-Stories/10077/99/0/1/0/0/0/0/
+straight
+databases/Harry-Potter_Order-of-Stories.bin
+/s/2964792/1/And-Still-Can-t-Stop-Hoping
+/s/3205105/1/And-the-Truth-Shall-Set-You-Free
+/s/2917903/1/All-at-Once
+/s/2580283/1/Saving-Connor
+/s/2400483/1/Anarkia
+/s/2400488/1/Dawn
+/s/1253905/1/Slytherin-Child
+/s/1362757/1/Harry-Potter-and-the-Mirror-Of-Paradox
+/s/1097925/1/Coexistence
+/s/1513674/1/The-Taming-Of-Harry-Potter
+/s/2232245/1/Æternus-Praestolatio
+
+Line 1: Link for download. Usually a community where every story in it is slash/not-slash for easy testing
+Line 2: Is this a slash or straight db
+Line 3: path to database
+Line 4 - first blank line or EOF: Stories that shouldnt be tested
+Line after blank line: Not parsed. Can add comments, like these Line explanations
+
+Issues:
+14 errors to rule 5 (if romance + all males + numCharacters > 1)
+1 error from rule 4 with /s/2291892/1/Harry-Potter-and-the-Demon-s-Awakening.
+    - "to slash his body". Hard to analyze where the A/N (just a disclaimer) ends, but that would fix it

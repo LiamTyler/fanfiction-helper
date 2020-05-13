@@ -8,7 +8,7 @@ def NearbySafeWord( desc, pos ):
     while begin >= max( 0, pos - 25 ) and desc[begin] not in ".!":
         begin -= 1
     begin += 1
-    prefixSafeWords = [ "no", "not", "free", "never", "fem" ]
+    prefixSafeWords = [ "no", "not", "free", "never", "fem", "implied" ]
     window = desc[begin:pos]
     splitWords = re.split( "\s+|\.|,|\?|\(|\)|\/|:", window )
     for safe in prefixSafeWords:
@@ -44,7 +44,7 @@ def SlashSpecific( desc ):
         end += 1
     
     word = desc[begin:end]
-    if NearbySafeWord( desc, pos ) or word in [ "noslash", "nonslash", "slashed", "slashing", "femslash" ]:
+    if NearbySafeWord( desc, pos ) or word in [ "noslash", "nonslash", "slashed", "slashes", "slashing", "femslash" ]:
         return 1
     
     return 2
@@ -80,13 +80,22 @@ def IsSlash( story ):
             if "no" not in desc[begin:pos] and "fem" not in desc[begin:pos]:
                 return 3
 
-    # Rule 4: Check first 1K words of story for match, like rule 2
-    #val = SlashSpecific( desc )
-    #if val > 0:
-    #    if val == 1:
-    #        return 0
-    #    else:
-    #        return 4
+    # Rule 4: Check first chapter for Slash keyword, like rule 2
+    # Look up to the first 1k words, but try to find where the authors note ends and the story starts
+    # if possible. Not trying to analyze the story contents, just the beginning info if its there
+    # TODO: more delimiters, like <hr>, "---------", etc
+    desc = story.first1kWords.lower()
+    storyBeginKeywords = [ "chapter one", "chapter 1", "prologue" ]
+    for key in storyBeginKeywords:
+        pos = desc.find( key )
+        if pos != -1:
+            desc = desc[:pos]
+            break
+    val = SlashSpecific( desc )
+    if val == 1:
+        return 0
+    elif val == 2:
+        return 4
 
     # Rules 5: if the genre == romance, every character is male, and numCharacters > 1, probably slash?
     numMales = 0

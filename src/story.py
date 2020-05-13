@@ -26,7 +26,7 @@ def GetStoryChapterText( chapterLink ):
     r = requests.get( url )
     soup = BeautifulSoup( r.text, 'html.parser' )
     a = soup.body.find( 'div', attrs={'id':'storytext'} )
-    return a.text
+    return a.get_text( "\n" )
 
 class Story:
     def __init__( self ):

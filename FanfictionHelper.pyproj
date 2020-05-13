@@ -28,6 +28,9 @@
   <ItemGroup>
     <Compile Include="src\filters.py" />
     <Compile Include="src\main.py" />
+    <Compile Include="src\test.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="src\scraper.py" />
     <Compile Include="src\story.py" />
     <Compile Include="src\story_database.py" />

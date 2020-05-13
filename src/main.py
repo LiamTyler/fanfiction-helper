@@ -2,74 +2,50 @@ from story import *
 from story_database import *
 from filters import *
 from scraper import *
+from test import *
 
-def ClassifyDatabase( dbFilename, slash, excludeList=[] ):
-    storyDB = StoryDB()
-    storyDB.Deserialize( dbFilename )
-
-    numRules = 6
-    ruleCounts = [0]*numRules
-    numStories = len(storyDB.stories)
-    for i in range(len(storyDB.stories)):
-        story = storyDB.stories[i]
-        if story.story_link in excludeList:
-            numStories -= 1
-            continue
-
-        val = IsSlash( story )
-        story.isSlash = val > 0
-        ruleCounts[val] += 1
-        if slash:
-            if val == 0:
-                print( "(p"+str(1 + i//25) + ", s" + str(i - 25*(i//25)) + "): " + story.title + ", desc = '" + story.description + "'" )
-        else:
-            if val > 0:
-                print( "Rule " + str(val) + " (p"+str(1 + i//25) + ", s" + str(i - 25*(i//25)) + "): " + story.title + ", desc = '" + story.description + "'" )
-
-    print( "\nSummary\n-----------------------------" )
-    for i in range( numRules ):
-        print( "Rule " + str(i) + ": " + str(ruleCounts[i]) )
-    print( "Straight: " + str(ruleCounts[0]), " Gay: " + str(sum(ruleCounts[1:])), " Total:", sum(ruleCounts) )
-    print( "Straight %:", ruleCounts[0]/numStories )
-    print( "\n" )
-
-    return storyDB
-
-
-def DownloadStories( bdName, baseUrl ):
+def DownloadAndSaveStories( bdName, baseUrl ):
     characterDB = LoadCharacterDictionary( "gender_lists/Harry-Potter_Character_Genders.txt" )
     storyDB = DownloadStories( baseUrl, characterDB )
     storyDB.Serialize( bdName )
 
     return storyDB
 
-#DownloadStories( "databases/hp_stories_gay.bin", "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10&len=10&_c1=6&_c2=9" ) # gay 664
-#DownloadStories( "databases/hp_stories_straight1.bin", "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10&len=10&_c1=6&_c2=9" ) # straight 155
-#DownloadStories( "databases/hp_stories_straight2.bin", "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10&len=10&_c1=6&_c2=9" ) # straight 264
-#DownloadStories( "databases/hp_stories_straight3.bin", "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10&len=10&_c1=6&_c2=9" ) # straight3 2116
+DownloadAndSaveStories( "databases/Harry-Potter_Harry-and-Draco-s-Love-Shack.bin", "https://www.fanfiction.net/community/Harry-and-Draco-s-Love-Shack/11605/99/0/1/0/0/0/0/" ) # gay 664
+#DownloadAndSaveStories( "databases/Harry-Potter_Order-of-Stories.bin", "https://www.fanfiction.net/community/Order-of-Stories/10077/99/0/1/0/0/0/0/" ) # straight3 ~2100
 
-#db = ClassifyDatabase( "databases/hp_stories_gay.bin", True )
-
-excludeList = [
-    '/s/2964792/1/And-Still-Can-t-Stop-Hoping',
-    '/s/3205105/1/And-the-Truth-Shall-Set-You-Free',
-    '/s/2917903/1/All-at-Once',
-    '/s/2580283/1/Saving-Connor',
-    '/s/2400483/1/Anarkia',
-    '/s/2400488/1/Dawn',
-]
-db = ClassifyDatabase( "databases/hp_stories_straight3.bin", False, excludeList )
+db = RunTestcaseFile( "testcases/Harry-Potter_slash1.txt" )
+# db = RunTestcaseFile( "testcases/Harry-Potter_straight1.txt" )
 
 
-#N = len(db.stories)
-#for i in range(N):
-#    story = db.stories[i]
-#    desc = story.description.lower()
-#    if not story.isSlash and "slash" in desc and SlashSpecific( desc ) != 2:
-#        print( "Story", i, ", desc = '", desc, "'" )
+# N = len(db.stories)
+# chapter = 0
+# chapter1 = 0
+# chapter2 = 0
+# prologue = 0
+# for i in range(N):
+#     story = db.stories[i]
+#     desc = story.first1kWords.lower()
+#     if "chapter" in desc:
+#         chapter += 1
+#     if "chapter one" in desc:
+#         chapter1 += 1
+#     if "chapter 1" in desc:
+#         chapter2 += 1
+#     if "prologue" in desc:
+#         prologue += 1
+# 
+# print( "Stories with 'chapter':", chapter )
+# print( "Stories with 'chapter one':", chapter1 )
+# print( "Stories with 'chapter 1':", chapter2 )
+# print( "Stories with 'prologue':", prologue )
+# print( "Total:", chapter1 + chapter2 + prologue, "/", chapter )
+
+#story = db.SearchTitle("Æternus-Praestolatio")[0]
+#chap = story.first1kWords
 
 """
-desc = "a story in limerick verse.  hxd femslash.  possible prequel to the mistletoe incident.  harry and draco find themselves in a frightening situation at the halloween feast. "
+desc = "reality is tilting.\r\nRedemption is not easily had. Slytherin!Harry Alive!ParentsNo\r\nslash. Subtle Harry/Bellatrix pairing, that"
 desc = desc.lower()
 pos = desc.find( "slash" )
 if pos == -1:
@@ -92,8 +68,17 @@ if NearbySafeWord( desc, pos ) or word in [ "slashed", "slashing" ]:
 else:
     print( "slash" )
 
-begin = max( 0, pos - 25 )
-end = pos + 10
-safeWords = [ "no", "not", "free", "never", "fem" ]
-words = re.split( ".|,| |\n", desc[begin:end] )
+begin = pos
+while begin >= max( 0, pos - 25 ) and desc[begin] not in ".!":
+    begin -= 1
+begin += 1
+prefixSafeWords = [ "no", "not", "free", "never", "fem", "implied" ]
+window = desc[begin:pos]
+splitWords = re.split( "\s+|\.|,|\?|\(|\)|\/|:", window )
+
+url = "https://www.fanfiction.net/s/2539995/1/Return-To-Reality"
+r = requests.get( url )
+soup = BeautifulSoup( r.text, 'html.parser' )
+a = soup.body.find( 'div', attrs={'id':'storytext'} )
+chap = a.get_text( "\n" )
 """
