@@ -1,6 +1,6 @@
 https://www.fanfiction.net/community/Harry-and-Draco-s-Love-Shack/11605/99/0/1/0/0/0/0/
 slash
-databases/Harry-Potter_Harry-and-Draco-s-Love-Shack.bin
+databases/Harry-and-Draco-s-Love-Shack.bin
 /s/2117919/1/The-Pumpkin-Juice-Incident
 /s/11952618/1/Inevitable
 /s/7793520/1/Girl-in-the-War
@@ -13,40 +13,19 @@ Line 3: path to database
 Line 4 - first blank line or EOF: Stories that shouldnt be tested
 Line after blank line: Not parsed. Can add comments, like these Line explanations
 
-(p1, s6): Freedom And Not Peace
-    - first chap has slash keyword
-(p2, s12): And it's Taken me With it
-    - difficult: the author bio lists it as slash
-(p2, s15): Irrrevocable
-    - desc = "Harry is contracted to marry Draco".
+(p1, s6): Freedom And Not Peace | first chap has slash keyword (im grabbing the first 1k characters, not words. Not long enough)
+(p2, s12): And it's Taken me With it | difficult: the author bio lists it as slash
+(p2, s15): Irrrevocable | desc = "Harry is contracted to marry Draco".
 (p3, s0): Here We Come a Wassailing
-(p3, s23): Constantine's Heir
-    - difficult description, author bio maybe
-    - HPDM keyword
-    - Author bio (Cheryl Dyson) also mentions slash
-(p5, s12): Brigandage
-    - desc "Mature content and threesome warning"
-    - bio (Cheryl Dyson)
-(p7, s12): Keep Holding On
-    - HPDM keyword
-(p8, s2): A Muggle Thing
-    - author bio
-(p8, s8): It Can't Be Love
-    - HPDM keyword
-(p8, s18): 50 Things Draco Malfoy's Not Allowed to Do
-    - impossible
-(p8, s23): Elementals
-    - HPDM keyword
-(p10, s16): Sting of Betrayal
+(p5, s12): Brigandage | desc "Mature content and threesome warning", bio (Cheryl Dyson)
+(p8, s2): A Muggle Thing | author bio
+(p8, s18): 50 Things Draco Malfoy's Not Allowed to Do | impossible
 (p11, s1): Draco Malfoy and the Tome of Entrapment
 (p12, s5): Dragon Mage
 (p13, s21): Comes Out of Darkness Morn
 (p13, s22): No Mouth But Some Serpent's
-(p15, s15): Until death do us part
-(p15, s17): Boy Gone Girl
 (p17, s15): Deceiving Grace
 (p17, s24): Walk Away
-(p18, s9): Angels and Demons
 (p18, s24): Walls
 (p19, s8): The Inescapable Truths
 (p20, s14): Only Your Shadow
@@ -55,7 +34,6 @@ Line after blank line: Not parsed. Can add comments, like these Line explanation
 (p22, s16): Coming of Age
 (p22, s22): The Lightning Letters II: Internal Affairs
 (p23, s1): The Opposite of Sex
-(p23, s5): When It All Goes Wrong Again
 (p23, s7): A Change Of Seasons
 (p23, s22): As A Bat
 (p24, s19): Within The Folds of Darkness
@@ -65,12 +43,13 @@ Line after blank line: Not parsed. Can add comments, like these Line explanation
 
 Summary
 -----------------------------
-Rule 0: 36
+Rule 0: 27
 Rule 1: 19
 Rule 2: 365
 Rule 3: 18
-Rule 4: 77
-Rule 5: 144
-Straight: 36  Gay: 623  Total: 659
-Straight %: 0.054628224582701064
-Gay %: 0.9453717754172989
+Rule 4: 73
+Rule 5: 51
+Rule 6: 106
+Straight: 27  Gay: 632  Total: 659
+Straight %: 0.0409711684370258
+Gay %: 0.9590288315629742

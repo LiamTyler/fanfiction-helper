@@ -65,7 +65,7 @@ def SlashSpecific( desc ):
 # returns integer:
 # 0 ==> not slash
 # > 0 ==> which rule identified it as slash
-def IsSlash( story ):
+def IsSlash( story, keywordExclusionList=[] ):
     # Rule 1: Check for explicit male pairings
     for pair in story.pairings:
         numMales = 0
@@ -93,7 +93,12 @@ def IsSlash( story ):
             if "no" not in desc[begin:pos] and "fem" not in desc[begin:pos]:
                 return 3
 
-    # Rule 4: Check first chapter for Slash keyword, like rule 2
+    # Rule 4: Check for banned fandom-specific keywords in description. Ex: HP/LV, HPDM, etc
+    for keyword in keywordExclusionList:
+        if keyword in desc:
+            return 4
+
+    # Rule 5: Check first chapter for Slash keyword, like rule 2
     # Look up to the first 1k words, but try to find where the authors note ends and the story starts
     # if possible. Not trying to analyze the story contents, just the beginning info if its there
     # TODO: more delimiters, like <hr>, "---------", etc
@@ -108,13 +113,13 @@ def IsSlash( story ):
     if val == 1:
         return 0
     elif val == 2:
-        return 4
+        return 5
 
-    # Rules 5: if the genre == romance, every character is male, and numCharacters > 1, probably slash?
+    # Rules 6: if the genre == romance, every character is male, and numCharacters > 1, probably slash?
     numMales = 0
     for char in story.characters:
         numMales += char.currentGender == 'M'
     if "Romance" in story.genres and numMales > 1 and numMales == len(story.characters):
-        return 5
+        return 6
 
     return 0

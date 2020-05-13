@@ -2,17 +2,17 @@ from story import *
 from story_database import *
 from filters import *
 
-def TestDatabase( storyDB, slash, excludeList=[] ):
-    numRules = 6
+def TestDatabase( storyDB, slash, keywordExclusionList = [], storyExcludeList=[] ):
+    numRules = 7
     ruleCounts = [0]*numRules
     numStories = len(storyDB.stories)
     for i in range(len(storyDB.stories)):
         story = storyDB.stories[i]
-        if story.story_id in excludeList:
+        if story.story_id in storyExcludeList:
             numStories -= 1
             continue
 
-        val = IsSlash( story )
+        val = IsSlash( story, keywordExclusionList )
         story.isSlash = val > 0
         ruleCounts[val] += 1
         if slash:
@@ -34,26 +34,29 @@ def TestDatabase( storyDB, slash, excludeList=[] ):
 
     return ruleCounts[0], sum(ruleCounts[1:]), sum(ruleCounts)
 
-def RunTestcaseFile( testcaseFilename ):
+def RunTestcaseFile( fandomName, testcaseFilename ):
+    fandom = "fandoms/" + fandomName + "/"
+    testcaseFilename = fandom + "testcases/" + testcaseFilename
     try:
         f = open( testcaseFilename, "r" )
     except:
         print( "Could not open file '" + testcaseFilename + "'" )
         return
 
+    keywordExclusionList = LoadExclusionKeywords( fandom + "exclusion_keywords.txt" )
     lines = [ line.strip() for line in f.readlines() ]
     url = lines[0]
     slash = lines[1] == "slash"
-    db = LoadStoryDB( lines[2] )
-    excludeList = []
+    db = LoadStoryDB( fandom + lines[2] )
+    storyExcludeList = []
     i = 3
     while lines[i] != '':
         story_link = lines[i]
         # use story_id because some titles with unicode dont seem to parse correctly
         story_id = story_link[3:story_link.find('/', 3)]
-        excludeList.append( story_id )
+        storyExcludeList.append( story_id )
         i += 1
 
-    results = TestDatabase( db, slash, excludeList )
+    results = TestDatabase( db, slash, keywordExclusionList, storyExcludeList )
 
     return db

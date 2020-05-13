@@ -69,4 +69,13 @@ def LoadCharacterDictionary( filename ):
         db[name] = gender
 
     return db
-        
+
+def LoadExclusionKeywords( filename ):
+    try:
+        f = open( filename, "r" )
+    except:
+        print( "Could not open file '" + filename + "'" )
+        return []
+
+    keywords = [ l.strip() for l in f.readlines() ]
+    return [ w for w in keywords if w != "" ]

@@ -4,54 +4,47 @@ from filters import *
 from scraper import *
 from test import *
 
-def DownloadAndSaveStories( bdName, baseUrl ):
-    characterDB = LoadCharacterDictionary( "gender_lists/Harry-Potter_Character_Genders.txt" )
+def DownloadAndSaveStories( fandomName, dbName, baseUrl ):
+    fandom = "fandoms/" + fandomName + "/"
+    dbName = fandom + "databases/" + dbName
+    characterDB = LoadCharacterDictionary( fandom + "genders.txt" )
     storyDB = DownloadStories( baseUrl, characterDB )
-    storyDB.Serialize( bdName )
+    storyDB.Serialize( dbName )
 
     return storyDB
 
-#DownloadAndSaveStories( "databases/Harry-Potter_Harry-and-Draco-s-Love-Shack.bin", "https://www.fanfiction.net/community/Harry-and-Draco-s-Love-Shack/11605/99/0/1/0/0/0/0/" ) # gay 664
-#DownloadAndSaveStories( "databases/Harry-Potter_Order-of-Stories.bin", "https://www.fanfiction.net/community/Order-of-Stories/10077/99/0/1/0/0/0/0/" ) # straight3 ~2100
+#DownloadAndSaveStories( "Harry-Potter", "Harry-and-Draco-s-Love-Shack.bin", "https://www.fanfiction.net/community/Harry-and-Draco-s-Love-Shack/11605/99/0/1/0/0/0/0/" ) # gay 664
+#DownloadAndSaveStories( "Harry-Potter", "Order-of-Stories.bin", "https://www.fanfiction.net/community/Order-of-Stories/10077/99/0/1/0/0/0/0/" ) # straight3 ~2100
 
-#db = RunTestcaseFile( "testcases/Harry-Potter_slash1.txt" )
-db = RunTestcaseFile( "testcases/Harry-Potter_straight1.txt" )
+#db = RunTestcaseFile( "Harry-Potter", "slash1.txt" )
+db = RunTestcaseFile( "Harry-Potter", "straight1.txt" )
 
+"""
 N = len(db.stories)
+counts = [0]*5
 for i in range(N):
     story = db.stories[i]
-    if not story.isSlash:
+    if story.isSlash:
         continue
     desc = story.description.lower()
-    for character in story.characters:
-        if character.originalGender != character.currentGender:
-            print( story.title )
+    if "hpdm" in desc:
+        counts[0] += 1
+        print( i//25 + 1, story.title, desc )
+    if "dmhp" in desc:
+        counts[1] += 1
+    if "hp-dm" in desc:
+        counts[2] += 1
 
-
+print( counts )
 """
-story = db.SearchTitle("King and Queen: Stone and Snow")[0]
+
+
+story = db.SearchTitle("It Can't Be Love")[0]
+
 desc = story.description.lower()
-for character in story.characters:
-    firstAndLast = character.name.split( ' ' )
-    lens = [ len(name) for name in firstAndLast ]
-    longestName = firstAndLast[lens.index(max(lens))].lower()
-    print( longestName )
-    pos = desc.find( longestName )
-    print( pos )
-    if pos != -1 and character.originalGender == 'M':
-        prefix = GetPrefixInCurrentSentence( desc, pos, 10 )
-        print( prefix )
-        if "fem" in prefix or "girl" in prefix:
-            print( desc )
-
-"""
-
-"""
-desc = "reality is tilting.\r\nRedemption is not easily had. Slytherin!Harry Alive!ParentsNo\r\nslash. Subtle Harry/Bellatrix pairing, that"
-desc = desc.lower()
 pos = desc.find( "slash" )
 if pos == -1:
-    print( "pos == -1" )
+    print("no match")
 
 delim = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ '
 begin = pos
@@ -65,22 +58,7 @@ while end < l and not desc[end] in delim:
     end += 1
     
 word = desc[begin:end]
-if NearbySafeWord( desc, pos ) or word in [ "slashed", "slashing" ]:
-    print( "neg/ not slash" )
-else:
-    print( "slash" )
+if NearbySafeWord( desc, pos ) or word in [ "noslash", "nonslash", "slashed", "slashes", "slashing", "femslash" ]:
+    print( "safe" )
 
-begin = pos
-while begin >= max( 0, pos - 25 ) and desc[begin] not in ".!":
-    begin -= 1
-begin += 1
-prefixSafeWords = [ "no", "not", "free", "never", "fem", "implied" ]
-window = desc[begin:pos]
-splitWords = re.split( "\s+|\.|,|\?|\(|\)|\/|:", window )
-
-url = "https://www.fanfiction.net/s/2539995/1/Return-To-Reality"
-r = requests.get( url )
-soup = BeautifulSoup( r.text, 'html.parser' )
-a = soup.body.find( 'div', attrs={'id':'storytext'} )
-chap = a.get_text( "\n" )
-"""
+print("end")
