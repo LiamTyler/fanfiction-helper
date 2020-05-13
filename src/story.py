@@ -1,4 +1,6 @@
 import time
+import requests
+from bs4 import BeautifulSoup
 
 # M = Male, F = Female, U = Unknown/Unimportant
 # Sometimes authors change character genders, which would be reflecte in currentGender (if parsed correctly)
@@ -18,6 +20,13 @@ def ParseStoryDescKeyNumVal( desc, key, startPos = 0, endMarker = ' ' ):
         s = desc[start : pos]
         s = s.replace( ',', '')
         return [ int( s ), pos ]  
+
+def GetStoryChapterText( chapterLink ):
+    url = "https://fanfiction.net" + chapterLink
+    r = requests.get( url )
+    soup = BeautifulSoup( r.text, 'html.parser' )
+    a = soup.body.find( 'div', attrs={'id':'storytext'} )
+    return a.text
 
 class Story:
     def __init__( self ):
@@ -41,6 +50,7 @@ class Story:
         self.numChapters  = 0
         self.updateDate   = 0
         self.publishDate  = 0
+        self.first1kWords = ""
         self._identifier  = ""
 
     def Parse( self, titleSection, descSection, characterDB={} ):
@@ -151,6 +161,8 @@ class Story:
             character.originalGender = dbGender
             # todo: check description to see if gender was swapped
             character.currentGender = dbGender
+
+        self.first1kWords = GetStoryChapterText( self.story_link )[:1000]
 
     def __lt__( self, other ):
         return self._identifier < other._identifier

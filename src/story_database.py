@@ -34,6 +34,9 @@ class StoryDB:
     def Exists( self, story ):
         [ present, index ] = self.BinarySearch( story )
         return present
+    
+    def SearchTitle( self, title ):
+        return [ s for s in self.stories if s.title == title ]
 
     def Insert( self, story ):
         self.stories.append( story )

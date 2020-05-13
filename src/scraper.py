@@ -2,7 +2,7 @@ import requests
 import time
 from story_database import *
 
-def ParsePage( text, characterDB ):
+def ParseFFSearchPage( text, characterDB ):
     lines = text.split( '\n' )
     #global story_links, story_descs
     story_links = [ x for x in lines if "class='z-list" in x ]
@@ -13,10 +13,12 @@ def ParsePage( text, characterDB ):
         s = Story()
         s.Parse(story_links[i], story_descs[i], characterDB )
         stories.append( s )
+        time.sleep( 1.3 )
 
     return stories
 
 def DownloadStories( baseUrl, characterDB, maxPages=100000 ):
+    print( "Downloading stories..." )
     storyDB  = StoryDB()
 
     # community urls differ slightly from regular search urls
@@ -33,25 +35,23 @@ def DownloadStories( baseUrl, characterDB, maxPages=100000 ):
     else:
         beginUrl += "&p="
 
-    numStories = 0
-    numSlash = 0
     page = 1
     while page <= maxPages:
-        if not page % 5:
-            print( "Parsing page: ", page )
         url = beginUrl + str( page ) + endUrl
         response = requests.get( url )
-        
+        print( "Pages Parsed: ", page )
+
         # If the urls dont match, then you've requested beyond the last page of stories
         if response.url != url:
             break
 
-        newStories = ParsePage( response.text, characterDB )
-        numStories += len(newStories)
+        newStories = ParseFFSearchPage( response.text, characterDB )
         for story in newStories:
             storyDB.Insert( story )
         
-        time.sleep( 1.000 )
+        #if not page % 5:
+        #    print( "Pages Parsed: ", page )
+        time.sleep( 1.3 )
         page += 1
 
     return storyDB

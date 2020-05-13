@@ -1,65 +1,94 @@
-False Negatives:
+False negatives for https://www.fanfiction.net/community/Harry-and-Draco-s-Love-Shack/11605/99/0/1/0/0/0/0/:
 ---------------------------------------------------------
-Parsing page:  1
-	Freedom And Not Peace | Drama/Suspense
+(p1, s6): Freedom And Not Peace | Drama/Suspense
         - first chap has slash keyword
-	Checkmating | Humor
+(p1, s18): Checkmating | Humor
         - says harry/draco in first chap
-Parsing page:  2
-	And it's Taken me With it | Humor
+(p2, s12): And it's Taken me With it | Humor
         - difficult: the author bio lists it as slash
-	Irrrevocable | Angst/Family
+(p2, s15): Irrrevocable | Angst/Family
         - desc = "Harry is contracted to marry Draco".
-Parsing page:  3
-	Here We Come a Wassailing | Romance
+(p3, s0): Here We Come a Wassailing | Romance
         - difficult description, author bio maybe
-	Constantine's Heir | Drama/Suspense
+(p3, s23): Constantine's Heir | Drama/Suspense
         - HPDM keyword
         - Author bio (Cheryl Dyson) also mentions slash
-Parsing page:  4
-Parsing page:  5
-	Brigandage | Adventure
+(p5, s12): Brigandage | Adventure
         - desc "Mature content and threesome warning"
         - bio (Cheryl Dyson)
-Parsing page:  6
-Parsing page:  7
-	Gold Tinted Spectacles | Fantasy/Drama
+(p7, s4): Gold Tinted Spectacles | Fantasy/Drama
         - Harry-Draco keyword
         - first chap has "slash"
-	Keep Holding On | Fantasy/Drama
+(p7, s12): Keep Holding On | Fantasy/Drama
         - HPDM keyword
-Parsing page:  8
-	A Muggle Thing | Humor
+(p8, s2): A Muggle Thing | Humor
         - author bio
-	It Can't Be Love | Drama/Angst
+(p8, s8): It Can't Be Love | Drama/Angst
         - HPDM keyword
-	50 Things Draco Malfoy's Not Allowed to Do | Humor
+(p8, s18): 50 Things Draco Malfoy's Not Allowed to Do | Humor
         - impossible
-	Draco's Boy | Angst
+(p8, s20): Draco's Boy | Angst
         - HPDM keyword
         - first chap says slash
-	Elementals | Adventure/Romance
+(p8, s23): Elementals | Adventure/Romance
         - HPDM keyword
+(p10, s9): Slytherin Saviours
+(p10, s16): Sting of Betrayal
+(p11, s1): Draco Malfoy and the Tome of Entrapment
+(p11, s19): Harry Potter and the Serpent's Call
+(p13, s21): Comes Out of Darkness Morn
+(p13, s22): No Mouth But Some Serpent's
+(p14, s22): Echoes of the Mind
+(p15, s15): Until death do us part
+(p15, s17): Boy Gone Girl
+(p17, s15): Deceiving Grace
+(p17, s24): Walk Away
+(p18, s9): Angels and Demons
+(p18, s24): Walls
+(p19, s8): The Inescapable Truths
+(p20, s14): Only Your Shadow
+(p21, s12): Today I Watched Draco Malfoy Die
+(p21, s22): Changes for the Better
+(p21, s24): Coexistence
+(p22, s10): Deep As You Go
+(p22, s16): Coming of Age
+(p22, s22): The Lightning Letters II: Internal Affairs
+(p23, s4): Tears
+(p23, s5): When It All Goes Wrong Again
+(p23, s7): A Change Of Seasons
+(p23, s22): As A Bat
+(p24, s6): Blood of a Malfoy
+(p24, s19): Within The Folds of Darkness
+(p25, s21): Echo of Your Angel
+(p26, s0): Heaven Is A Place Nearby
+(p26, s20): Eclipse
+(p27, s11): Forgive Me, Love
 
 
-False Positives:
+False Positives for https://www.fanfiction.net/community/Order-of-Stories/10077/99/0/1/0/0/0/0/:
 ------------------------------------
-Rule 3 (p29, s14): Not Another Second Chance Story
-Rule 3 (p32, s1): King and Queen: Stone and Snow
-Rule 3 (p38, s19): Harry's Last Hope
-Rule 3 (p41, s20): Across the Mirror
-Rule 3 (p43, s4): Returning
-Rule 3 (p44, s18): Harry Potter and the Heir of Voldemort
-Rule 2 (p47, s2): Saving Connor
-    - "eventual HPDM slash" --> not actually a false positive
-Rule 3 (p50, s2): Born of the Water Lily
-Rule 3 (p51, s0): The Time of Destiny
-Rule 3 (p57, s18): When Worlds Collide
-Rule 3 (p58, s7): The Girl in the Tower
-Rule 3 (p59, s7): Child of Darkness, Child of Light
-Rule 3 (p64, s21): Fire and Ice
-Rule 3 (p67, s13): History Repeats Itself
+Rule 5 (p32, s1): King and Queen: Stone and Snow
+Rule 5 (p38, s19): Harry's Last Hope
+Rule 5 (p43, s4): Returning
+Rule 5 (p44, s18): Harry Potter and the Heir of Voldemort
+Rule 5 (p50, s2): Born of the Water Lily
+Rule 5 (p51, s0): The Time of Destiny
+Rule 5 (p57, s18): When Worlds Collide
+Rule 5 (p58, s7): The Girl in the Tower
+Rule 5 (p59, s7): Child of Darkness, Child of Light
+Rule 5 (p64, s21): Fire and Ice
+Rule 5 (p67, s13): History Repeats Itself
+Rule 5 (p68, s8): The Tangibility of Magic
+Rule 5 (p73, s11): WIZARDS DUEL--SIXTH YEAR
+Rule 5 (p74, s24): Inquiring Minds
 
-Rule 3 (p68, s8): The Tangibility of Magic
-Rule 3 (p73, s11): WIZARDS DUEL--SIXTH YEAR
-Rule 3 (p74, s24): Inquiring Minds
+Summary
+-----------------------------
+Rule 0: 2096
+Rule 1: 0
+Rule 2: 0
+Rule 3: 0
+Rule 4: 0
+Rule 5: 14
+Straight: 2096  Gay: 14  Total: 2110
+Straight %: 0.9933649289099526
