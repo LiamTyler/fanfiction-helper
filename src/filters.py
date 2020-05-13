@@ -2,6 +2,19 @@ from story import *
 import re
 import string
 
+def GetPrefixInCurrentSentence( string, pos, maxLen=25 ):
+    begin = pos
+    while begin >= max( 0, pos - maxLen ):
+        if string[begin] == '.':
+            break
+        # Catch end of normal sentence "! ", but not exclamation tags like "girl!Harry"
+        if string[begin] == '!' and string[begin+1]==' ':
+            break
+        begin -= 1
+    begin += 1
+
+    return string[begin:pos]
+
 def NearbySafeWord( desc, pos ):
     # Look up to 25 characters back in the current sentence for a safe word
     begin = pos

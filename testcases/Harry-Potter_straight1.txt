@@ -19,7 +19,40 @@ Line 3: path to database
 Line 4 - first blank line or EOF: Stories that shouldnt be tested
 Line after blank line: Not parsed. Can add comments, like these Line explanations
 
-Issues:
-14 errors to rule 5 (if romance + all males + numCharacters > 1)
-1 error from rule 4 with /s/2291892/1/Harry-Potter-and-the-Demon-s-Awakening.
+Rule 5 (p38, s19): Harry's Last Hope
+    - No chance. "Not a Severitus but close."
+Rule 5 (p43, s4): Returning
+    - desc "eventual HG"
+Rule 5 (p44, s18): Harry Potter and the Heir of Voldemort
+    - No chance. Desc sounds gay, hard to tell from the story what the relationship even is
+Rule 5 (p50, s2): Born of the Water Lily
+    - No chance
+Rule 5 (p51, s0): The Time of Destiny
+    - desc "HPGW"
+Rule 5 (p58, s7): The Girl in the Tower
+    - harry + draco cahracters, but unlisted OC straight romance, but desc = "Harry meets a mysterious girl, hidden at Hogwarts"
+Rule 5 (p59, s7): Child of Darkness, Child of Light
+    - ehh.... super hard to figure out. Count # of "she" and "her" in first 1k words maybe?
+Rule 5 (p67, s13): History Repeats Itself
+    - Actually fem blaise, description says "the gorgeous slytherin girl".
+Rule 4 (p67, s14): Harry Potter and the Demon's Awakening
     - "to slash his body". Hard to analyze where the A/N (just a disclaimer) ends, but that would fix it
+Rule 5 (p68, s8): The Tangibility of Magic
+    - No chance
+Rule 5 (p73, s11): WIZARDS DUEL--SIXTH YEAR
+    - No chance
+Rule 5 (p74, s24): Inquiring Minds
+    - fem blaise: "No one ever said being Harry Potter’s girlfriend was going to be easy, but after 7 months at it one sly Slytherin thought she’d mastered it"
+
+
+Summary
+-----------------------------
+Rule 0: 2093
+Rule 1: 0
+Rule 2: 0
+Rule 3: 0
+Rule 4: 1
+Rule 5: 11
+Straight: 2093  Gay: 12  Total: 2105
+Straight %: 0.9942992874109263
+Gay %: 0.005700712589073635

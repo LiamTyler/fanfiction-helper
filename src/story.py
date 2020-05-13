@@ -159,8 +159,24 @@ class Story:
                 continue
             dbGender = characterDB[character.name]
             character.originalGender = dbGender
-            # todo: check description to see if gender was swapped
             character.currentGender = dbGender
+            # check the description to see if any of the genders were swapped
+            desc = story.description.lower()
+            firstAndLast = character.name.split( ' ' )
+            lens = [ len(name) for name in firstAndLast ]
+            longestName = firstAndLast[lens.index(max(lens))].lower()
+            pos = desc.find( longestName )
+            while pos != -1:
+                prefix = GetPrefixInCurrentSentence( desc, pos, 8 )
+                if "fem" in prefix or "girl" in prefix:
+                    print( "SWAP!", desc )
+                    character.currentGender = 'F'
+                    break
+                if " male" in prefix or " boy" in prefix:
+                    print( "SWAP!", desc )
+                    character.currentGender = 'M'
+                    break
+                pos = desc.find( longestName, pos + 1 )
 
         self.first1kWords = GetStoryChapterText( self.story_link )[:1000]
 

@@ -17,10 +17,12 @@ def TestDatabase( storyDB, slash, excludeList=[] ):
         ruleCounts[val] += 1
         if slash:
             if val == 0:
-                print( "(p"+str(1 + i//25) + ", s" + str(i - 25*(i//25)) + "): " + story.title + ", desc = '" + story.description + "'" )
+                #print( "(p"+str(1 + i//25) + ", s" + str(i - 25*(i//25)) + "): " + story.title + ", desc = '" + story.description + "'" )
+                print( "(p"+str(1 + i//25) + ", s" + str(i - 25*(i//25)) + "): " + story.title )
         else:
             if val > 0:
-                print( "Rule " + str(val) + " (p"+str(1 + i//25) + ", s" + str(i - 25*(i//25)) + "): " + story.title + ", desc = '" + story.description + "'" )
+                #print( "Rule " + str(val) + " (p"+str(1 + i//25) + ", s" + str(i - 25*(i//25)) + "): " + story.title + ", desc = '" + story.description + "'" )
+                print( "Rule " + str(val) + " (p"+str(1 + i//25) + ", s" + str(i - 25*(i//25)) + "): " + story.title )
 
     print( "\nSummary\n-----------------------------" )
     for i in range( numRules ):
