@@ -2,14 +2,24 @@ from story import *
 import re
 import string
 
-def NegativeInNeighborhood( desc, pos, width=25 ):
-    begin = max( 0, pos - width )
-    end = pos + 10
-    safeWords = [ "no", "not", "free", "never", "fem" ]
-    #words = re.split( "\.|,| |\n|!", desc[begin:end] )
-    words = desc[begin:end]
-    for safe in safeWords:
-        if safe in words:
+def NearbySafeWord( desc, pos ):
+    # Look up to 25 characters back in the current sentence for a safe word
+    begin = pos
+    while begin >= max( 0, pos - 25 ) and desc[begin] not in ".!":
+        begin -= 1
+    begin += 1
+    prefixSafeWords = [ "no", "not", "free", "never", "fem" ]
+    window = desc[begin:pos]
+    splitWords = re.split( "\s+|\.|,|\?|\(|\)|\/|:", window )
+    for safe in prefixSafeWords:
+        if safe in splitWords:
+            return True
+
+    # sometimes there are "slash free", but want to avoid catching something like "contains Slash. Not cannon"
+    postfixSafeWords = [ "free" ]
+    window = desc[pos:pos+10]
+    for safeWord in postfixSafeWords:
+        if safeWord in window:
             return True
 
     return False
@@ -34,7 +44,7 @@ def SlashSpecific( desc ):
         end += 1
     
     word = desc[begin:end]
-    if NegativeInNeighborhood( desc, pos ) or word in [ "slashed", "slashing" ]:
+    if NearbySafeWord( desc, pos ) or word in [ "noslash", "nonslash", "slashed", "slashing", "femslash" ]:
         return 1
     
     return 2
