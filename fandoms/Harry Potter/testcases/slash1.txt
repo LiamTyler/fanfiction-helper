@@ -13,7 +13,6 @@ Line 3: path to database
 Line 4 - first blank line or EOF: Stories that shouldnt be tested
 Line after blank line: Not parsed. Can add comments, like these Line explanations
 
-(p1, s6): Freedom And Not Peace | first chap has slash keyword (im grabbing the first 1k characters, not words. Not long enough)
 (p2, s12): And it's Taken me With it | difficult: the author bio lists it as slash
 (p2, s15): Irrrevocable | desc = "Harry is contracted to marry Draco".
 (p3, s0): Here We Come a Wassailing
@@ -30,7 +29,6 @@ Line after blank line: Not parsed. Can add comments, like these Line explanation
 (p19, s8): The Inescapable Truths
 (p20, s14): Only Your Shadow
 (p21, s12): Today I Watched Draco Malfoy Die
-(p22, s10): Deep As You Go
 (p22, s16): Coming of Age
 (p22, s22): The Lightning Letters II: Internal Affairs
 (p23, s1): The Opposite of Sex
@@ -43,13 +41,13 @@ Line after blank line: Not parsed. Can add comments, like these Line explanation
 
 Summary
 -----------------------------
-Rule 0: 27
+Rule 0: 25
 Rule 1: 19
 Rule 2: 365
 Rule 3: 18
 Rule 4: 73
-Rule 5: 51
+Rule 5: 53
 Rule 6: 106
-Straight: 27  Gay: 632  Total: 659
-Straight %: 0.0409711684370258
-Gay %: 0.9590288315629742
+Straight: 25  Gay: 634  Total: 659
+Straight %: 0.03793626707132018
+Gay %: 0.9620637329286799

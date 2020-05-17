@@ -2,28 +2,15 @@ from story import *
 import re
 import string
 
-def GetPrefixInCurrentSentence( string, pos, maxLen=25 ):
-    begin = pos
-    while begin >= max( 0, pos - maxLen ):
-        if string[begin] == '.':
-            break
-        # Catch end of normal sentence "! ", but not exclamation tags like "girl!Harry"
-        if string[begin] == '!' and string[begin+1]==' ':
-            break
-        begin -= 1
-    begin += 1
-
-    return string[begin:pos]
-
 def NearbySafeWord( desc, pos ):
     # Look up to 25 characters back in the current sentence for a safe word
     begin = pos
     while begin >= max( 0, pos - 25 ) and desc[begin] not in ".!":
         begin -= 1
     begin += 1
-    prefixSafeWords = [ "no", "not", "free", "never", "fem", "implied" ]
+    prefixSafeWords = [ "no", "not", "free", "never", "fem", "implied", "won't" ]
     window = desc[begin:pos]
-    splitWords = re.split( "\s+|\.|,|\?|\(|\)|\/|:", window )
+    splitWords = re.split( "\s+|\.|,|\?|\(|\)|\/|:|\"", window )
     for safe in prefixSafeWords:
         if safe in splitWords:
             return True
@@ -75,7 +62,7 @@ def IsSlash( story, keywordExclusionList=[] ):
         if numMales > 1:
             return 1
 
-    desc = story.description.lower() 
+    desc = story.description
     # Rule 2: Check for slash, but not "no slash", "slashed", "slashes", etc
     val = SlashSpecific( desc )
     if val == 1:
@@ -98,18 +85,8 @@ def IsSlash( story, keywordExclusionList=[] ):
         if keyword in desc:
             return 4
 
-    # Rule 5: Check first chapter for Slash keyword, like rule 2
-    # Look up to the first 1k words, but try to find where the authors note ends and the story starts
-    # if possible. Not trying to analyze the story contents, just the beginning info if its there
-    # TODO: more delimiters, like <hr>, "---------", etc
-    desc = story.first1kWords.lower()
-    storyBeginKeywords = [ "chapter one", "chapter 1", "prologue" ]
-    for key in storyBeginKeywords:
-        pos = desc.find( key )
-        if pos != -1:
-            desc = desc[:pos]
-            break
-    val = SlashSpecific( desc )
+    # Rule 5: Check beginning of first chapter for Slash keyword, like rule 2.
+    val = SlashSpecific( story.chap1Beginning )
     if val == 1:
         return 0
     elif val == 2:

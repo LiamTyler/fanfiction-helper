@@ -12,6 +12,7 @@ databases/Order-of-Stories.bin
 /s/1097925/1/Coexistence
 /s/1513674/1/The-Taming-Of-Harry-Potter
 /s/2232245/1/Æternus-Praestolatio
+/s/2612486/1/No-Mouth-But-Some-Serpent-s
 
 Line 1: Link for download. Usually a community where every story in it is slash/not-slash for easy testing
 Line 2: Is this a slash or straight db
@@ -47,12 +48,13 @@ Rule 5 (p74, s24): Inquiring Minds
 
 Summary
 -----------------------------
-Rule 0: 2093
+Rule 0: 2092
 Rule 1: 0
 Rule 2: 0
 Rule 3: 0
-Rule 4: 1
-Rule 5: 11
-Straight: 2093  Gay: 12  Total: 2105
-Straight %: 0.9942992874109263
-Gay %: 0.005700712589073635
+Rule 4: 0
+Rule 5: 1
+Rule 6: 11
+Straight: 2092  Gay: 12  Total: 2104
+Straight %: 0.9942965779467681
+Gay %: 0.005703422053231939

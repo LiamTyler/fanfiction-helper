@@ -1,7 +1,10 @@
-Finding gay stores:
+Ideas for finding more slash stores:
 - could maybe look for keyword "marry" / "marriage"?
-- there are universe specific keywords that could be added, just like the gender list (HPDM, HPLV, etc). Seems like if people do include a universe specific keyword, they often skip the generic ones like "slash", etc.
-- "homo" keyword?
+- Could look for a sentence containing 2 male characters and a telling verb: love, kiss, etc.
 
 Todo:
+- Fix Story::first1kWords. Right now it only takes first 1k characters, not words. Sometimes it's not long enough, but ocassionally too long. Should look for delimiter, and store however many words that uses.
+- Improve chapter 1 A/N delimiter search
+- web interface
+- Get it pulling stories ocassionally on old laptop
 - plagiarism. Look at reviews perhaps? Often someone in the first 100 figures it out with a link to the original

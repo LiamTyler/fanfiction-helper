@@ -1,6 +1,6 @@
 import time
 import requests
-from bs4 import BeautifulSoup
+import bs4
 
 # M = Male, F = Female, U = Unknown/Unimportant
 # Sometimes authors change character genders, which would be reflecte in currentGender (if parsed correctly)
@@ -9,6 +9,9 @@ class Character:
         self.name           = name
         self.originalGender = originalGender
         self.currentGender  = currentGender
+
+    def __repr__( self ):
+        return "(" + self.name + ", " + self.currentGender + ")"
 
 def ParseStoryDescKeyNumVal( desc, key, startPos = 0, endMarker = ' ' ):
         start = desc.find( key, startPos )
@@ -21,37 +24,52 @@ def ParseStoryDescKeyNumVal( desc, key, startPos = 0, endMarker = ' ' ):
         s = s.replace( ',', '')
         return [ int( s ), pos ]  
 
-def GetStoryChapterText( chapterLink ):
+def GetStoryChapterHTML( chapterLink ):
     url = "https://fanfiction.net" + chapterLink
     r = requests.get( url )
-    soup = BeautifulSoup( r.text, 'html.parser' )
+    soup = bs4.BeautifulSoup( r.text, 'html.parser' )
     a = soup.body.find( 'div', attrs={'id':'storytext'} )
-    return a.get_text( "\n" )
+    return a
+
+
+def GetPrefixInCurrentSentence( string, pos, maxLen=25 ):
+    begin = pos
+    while begin >= max( 0, pos - maxLen ):
+        if string[begin] == '.':
+            break
+        # Catch end of normal sentence "! ", but not exclamation tags like "girl!Harry"
+        if string[begin] == '!' and string[begin+1]==' ':
+            break
+        begin -= 1
+    begin += 1
+
+    return string[begin:pos]
 
 class Story:
     def __init__( self ):
-        self.title        = ""
-        self.rating       = ""
-        self.words        = 0
-        self.language     = ""
-        self.author       = ""
-        self.author_link  = ""
-        self.description  = ""
-        self.story_link   = ""
-        self.story_id     = ""
-        self.genres       = []
-        self.characters   = []
-        self.pairings     = [] # indices into self.characters array
-        self.isSlash      = False
-        self.complete     = False
-        self.numReviews   = 0
-        self.numFavorites = 0
-        self.numFollows   = 0
-        self.numChapters  = 0
-        self.updateDate   = 0
-        self.publishDate  = 0
-        self.first1kWords = ""
-        self._identifier  = ""
+        self.title          = ""
+        self.rating         = ""
+        self.words          = 0
+        self.language       = ""
+        self.author         = ""
+        self.author_link    = ""
+        self.description    = ""
+        self.story_link     = ""
+        self.story_id       = ""
+        self.genres         = []
+        self.characters     = []
+        self.pairings       = [] # indices into self.characters array
+        self.isSlash        = False
+        self.complete       = False
+        self.numReviews     = 0
+        self.numFavorites   = 0
+        self.numFollows     = 0
+        self.numChapters    = 0
+        self.updateDate     = 0
+        self.publishDate    = 0
+        self.chap1Beginning = ""
+        self.debugInfo      = ""
+        self._identifier    = ""
 
     def Parse( self, titleSection, descSection, characterDB={} ):
         # story_link
@@ -80,7 +98,7 @@ class Story:
         # description
         start = descSection.find( '>' ) + 1
         pos = descSection.find( '<div class', start )
-        self.description = descSection[start : pos]
+        self.description = descSection[start : pos].lower()
 
         # rating
         start = descSection.find( "Rated: ", pos ) + len( "Rated: " )
@@ -161,7 +179,7 @@ class Story:
             character.originalGender = dbGender
             character.currentGender = dbGender
             # check the description to see if any of the genders were swapped
-            desc = story.description.lower()
+            desc = self.description
             firstAndLast = character.name.split( ' ' )
             lens = [ len(name) for name in firstAndLast ]
             longestName = firstAndLast[lens.index(max(lens))].lower()
@@ -169,16 +187,44 @@ class Story:
             while pos != -1:
                 prefix = GetPrefixInCurrentSentence( desc, pos, 8 )
                 if "fem" in prefix or "girl" in prefix:
-                    print( "SWAP!", desc )
                     character.currentGender = 'F'
                     break
                 if " male" in prefix or " boy" in prefix:
-                    print( "SWAP!", desc )
                     character.currentGender = 'M'
                     break
                 pos = desc.find( longestName, pos + 1 )
 
-        self.first1kWords = GetStoryChapterText( self.story_link )[:1000]
+        # Try to get the beginning authors note from chapter 1, if it exists / detectable.
+        html = GetStoryChapterHTML( self.story_link )
+        text = html.get_text( "\n" ).lower()
+        storyBeginKeywords = [ "chapter one", "chapter 1", "prologue" ]
+        pos = -1
+        for key in storyBeginKeywords:
+            pos = text.find( key )
+            if pos != -1:
+                text = text[:pos]
+                break
+        # Sometimes authors use a <hr> delimiter instead of "chapter 1" or whatever
+        if pos == -1:
+            if html.hr:
+                allPrevElements = list( html.hr.previous_siblings )[::-1]
+                prevText = ""
+                for element in allPrevElements:
+                    currText = ""
+                    if isinstance( element, bs4.NavigableString ):
+                        currText = str( element )
+                    else:
+                        currText = element.get_text( "\n" )
+                    currText = currText.strip()
+                    if currText != "":
+                        prevText += currText + "\n"
+                prevText = prevText.strip()
+                if prevText != "":
+                    text = prevText
+        if len(text) > 2000:
+            text = text[:2000]
+        self.chap1Beginning = text.lower()
+
 
     def __lt__( self, other ):
         return self._identifier < other._identifier

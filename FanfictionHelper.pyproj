@@ -13,6 +13,7 @@
     <Name>FanfictionHelper</Name>
     <RootNamespace>FanfictionHelper</RootNamespace>
     <IsWindowsApplication>False</IsWindowsApplication>
+    <TestFramework>Pytest</TestFramework>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -24,6 +25,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="src\" />
+    <Folder Include="src\web_interface\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\filters.py" />
@@ -34,6 +36,9 @@
     <Compile Include="src\scraper.py" />
     <Compile Include="src\story.py" />
     <Compile Include="src\story_database.py" />
+    <Compile Include="src\web_interface\web.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

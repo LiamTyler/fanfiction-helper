@@ -1,0 +1,132 @@
+"1-A Students" U
+"1-B Students" U
+"A. Sako/Mr. Compress" M
+"All For One" M
+"Black Mist" M
+"Camie" F
+"Cementoss" M
+"Chitose K./Curious" M
+"Chiyo S./Recovery Girl" F
+"Chizome A./Hero Killer" M
+"D. Tobita/Gentle C." M
+"Dabi" M
+"Daruma U." M
+"David S." M
+"Denki K." M
+"Desutegoro/Death Arms" M
+"E. Kirishima" M
+"Eight Precepts of Death" M
+"Eijirou K." M
+"Emi F./Ms. Joke" F
+"Enji T./Endeavor" M
+"Eri" F
+"Fumikage T." M
+"Fuyumi T." F
+"Geten" M
+"Giran" M
+"H. Kurono/Chronostasis" M
+"Habuko M." F
+"Hanta S." M
+"Hawk" M
+"Hawks" M
+"Higari M./Power Loader" M
+"Hisashi M." M
+"Hitoshi S." M
+"Hizashi Y./Present Mic" M
+"I. Yoarashi" M
+"Inko M." F
+"Itsuka K." F
+"Izuku M." M
+"J. Honenuki" M
+"Jirou K." F
+"K. Bondo" M
+"K. Komori" F
+"K. Kōda" M
+"K. Tsuburaba" M
+"Kamui Wood" M
+"Kamui Woods" M
+"Katsuki B." M
+"Kazuho H./Pop Step" F
+"Kenji H./Magne" F
+"Koichi H./The Crawler" M
+"Kota I." M
+"Kugo Sakamata/Gang Orca" M
+"M. Aiba/La Brava" F
+"M. Fukidashi" M
+"M. Ojiro" M
+"Masaru B." M
+"Mei H." F
+"Melissa S." F
+"Mina A." F
+"Minoru M." M
+"Mirio T." M
+"Mitsuki B." F
+"Momo Y." F
+"Mr. Oguro/Knuckleduster" M
+"Muscular" M
+"N. Hadō" F
+"N. Mōra" M
+"Nana S." F
+"Naruhata Vigilantes" M
+"Natsuo T." M
+"Neito M." M
+"Nemuri K./Midnight" M
+"Nezu/The Principal" F
+"Nirengeki S." M
+"No. 13" U
+"Noumu" U
+"OC" U
+"Ochako U." F
+"One For All" U
+"Overhaul/Chisaki K." M 
+"Pony T." F
+"R. Satō" M
+"R. Tsuchikawa/Pixie-Bob" F
+"R. Yanagi" F
+"Rei T./Shōto’s Mother" F
+"Rumi U./Mirku" F
+"Ryo I./Hound Dog" M
+"Ryuko T./Ryukyu" F
+"S. Kaibara." M
+"S. Kuroiro" M
+"S. Shishikura" M
+"S. Sosaki/Mandalay" F
+"Saiko I." F
+"Samidare A." M
+"Satsuki A." F
+"Sekijiro Kan/Vlad King" M
+"Setsuna T." F
+"Shigaraki T." M
+"Shinji Nishiya/Kamui Woods" M
+"Shinya K./Edgeshot" M
+"Shiozaki I." F
+"Shoji M." M
+"Shoto/Shouto's Mother" F
+"Shouta A./Eraserhead" M
+"Shouto T." M
+"Sludge V." M
+"Sorahiko/Gran Torino" M
+"T. Amajiki" M
+"T. Kamakiri" M
+"Taishiro T./Fat Gum" M
+"Tatami N." F
+"Tensei I./Ingenium" M
+"Tenya I." M
+"Tetsutetsu T." M
+"The Pussycats" F
+"Tobita G." M
+"Toga H." F
+"Tomoko S." F
+"Tooru H." F
+"Toshinori Y./All Might" M
+"Touya T." M
+"Tsukauchi N." M
+"Tsunagu H./Best Jeanist" M
+"Tsuyu A." F
+"Twice" M
+"Uwabami" F
+"Villain Alliance" U
+"Y. Aoyama" M
+"Yu T./Mount Lady" F
+"Yui K." F
+"Yōsetsu A." M

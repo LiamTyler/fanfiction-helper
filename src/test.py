@@ -25,7 +25,7 @@ def TestDatabase( storyDB, slash, keywordExclusionList = [], storyExcludeList=[]
                 print( "Rule " + str(val) + " (p"+str(1 + i//25) + ", s" + str(i - 25*(i//25)) + "): " + story.title )
 
     print( "\nSummary\n-----------------------------" )
-    for i in range( numRules ):
+    for i in range( 1, numRules ):
         print( "Rule " + str(i) + ": " + str(ruleCounts[i]) )
     print( "Straight: " + str(ruleCounts[0]), " Gay: " + str(sum(ruleCounts[1:])), " Total:", sum(ruleCounts) )
     print( "Straight %:", ruleCounts[0]/numStories )
@@ -43,7 +43,8 @@ def RunTestcaseFile( fandomName, testcaseFilename ):
         print( "Could not open file '" + testcaseFilename + "'" )
         return
 
-    keywordExclusionList = LoadExclusionKeywords( fandom + "exclusion_keywords.txt" )
+    info = LoadFandomInfo( fandom + "info.txt" )
+    keywordExclusionList = info["exclusionKeywords"]
     lines = [ line.strip() for line in f.readlines() ]
     url = lines[0]
     slash = lines[1] == "slash"

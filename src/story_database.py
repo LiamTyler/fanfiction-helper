@@ -58,24 +58,24 @@ def LoadStoryDB( filename ):
     db.Deserialize( filename )
     return db
 
-# returns dictionary is key = name (string), value = either M, F, or U (unknown) (char)
-def LoadCharacterDictionary( filename ):
-    db = dict()
-    file = open( filename, "r" )
-    for line in file:
-        endOfName = line.find( "\"", 1 )
-        name = line[1:endOfName]
-        gender = line[-2]
-        db[name] = gender
-
-    return db
-
-def LoadExclusionKeywords( filename ):
+def LoadFandomInfo( filename ):
+    ret = dict()
     try:
-        f = open( filename, "r" )
+        f = open( filename, "r", encoding="utf8" )
     except:
         print( "Could not open file '" + filename + "'" )
-        return []
+        return ret
+    lines = [ line.strip() for line in f.readlines() if len(line) > 0 and line[0] != '#' ]
+    ret["fullname"] = lines[0]
+    ret["exclusionKeywords"] = [ x.lower() for x in lines[1].split(',') if x != '' ]
 
-    keywords = [ l.strip() for l in f.readlines() ]
-    return [ w for w in keywords if w != "" ]
+    genders = dict()
+    for line in lines[2:]:
+        endOfName = line.find( "\"", 1 )
+        name = line[1:endOfName]
+        gender = line[-1]
+        genders[name] = gender
+
+    ret["characterGenders"] = genders
+
+    return ret
