@@ -3,13 +3,15 @@ from story_database import *
 from filters import *
 from scraper import *
 from test import *
+import cloudscraper
+import undetected_chromedriver.v2 as uc
 
-def DownloadAndSaveStories( fandomName, dbName, baseUrl ):
+def DownloadAndSaveStories( fandomName, dbName, baseUrl, maxPages=1000000 ):
     fandom = "fandoms/" + fandomName + "/"
     dbName = fandom + "databases/" + dbName
     info = LoadFandomInfo( fandom + "info.txt" )
     characterDB = info["characterGenders"]
-    storyDB = DownloadStories( baseUrl, characterDB )
+    storyDB = DownloadStories( baseUrl, characterDB, maxPages )
     storyDB.Serialize( dbName )
 
     return storyDB
@@ -18,7 +20,7 @@ def DownloadAndSaveStories( fandomName, dbName, baseUrl ):
 #DownloadAndSaveStories( "Harry Potter", "Order-of-Stories.bin", "https://www.fanfiction.net/community/Order-of-Stories/10077/99/0/1/0/0/0/0/" )
 #DownloadAndSaveStories( "My Hero Academia", "BakuDeku.bin", "https://www.fanfiction.net/community/BakuDeku/132352/99/0/1/0/0/0/0/" )
 
-db = RunTestcaseFile( "My Hero Academia", "slash1.txt" )
+#db = RunTestcaseFile( "My Hero Academia", "slash1.txt" )
 #db = RunTestcaseFile( "Harry Potter", "slash1.txt" )
 #db = RunTestcaseFile( "Harry Potter", "straight1.txt" )
 #html = GetStoryChapterHTML( "/s/2721625/1/Freedom-And-Not-Peace" )
@@ -26,69 +28,61 @@ db = RunTestcaseFile( "My Hero Academia", "slash1.txt" )
 #html = GetStoryChapterHTML( "/s/5639518/1/The-Harem-War" )
 #story = db.SearchTitle("The Harem War")[0]
 
-"""
-desc = story.chap1Beginning
-pos = desc.find( "slash" )
-begin = pos
-while begin >= max( 0, pos - 25 ) and desc[begin] not in ".!":
-    begin -= 1
-begin += 1
-prefixSafeWords = [ "no", "not", "free", "never", "fem", "implied" ]
-window = desc[begin:pos]
-splitWords = re.split( "\s+|\.|,|\?|\(|\)|\/|:|\"", window )
-for safe in prefixSafeWords:
-    if safe in splitWords:
-        print( "found safe:", safe )
+#stories = DownloadAndSaveStories( "Harry Potter", "regular.bin", "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10", 1 )
+#print(stories)
 
-# sometimes there are "slash free", but want to avoid catching something like "contains Slash. Not cannon"
-postfixSafeWords = [ "free" ]
-window = desc[pos:pos+10]
-for safeWord in postfixSafeWords:
-    if safeWord in window:
-        print( "found safeWord:", safeWord )
-"""
+#htmlScraper = cloudscraper.create_scraper( browser={'browser': 'chrome','platform': 'windows','mobile': False} )
+#page = GetHTMLPage( "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10", htmlScraper )
+#page = GetHTMLPage( "https://fanfiction.net/s/13952690/1/The-Devil-s-Smile", htmlScraper )
+#page = GetHTMLPage( "https://fanfiction.net/s/13895922/1/The-Girl-Who-Lived-Sort-Of", htmlScraper )
 
-"""
-N = len(db.stories)
-counts = [0]*5
-for i in range(N):
-    story = db.stories[i]
-    if story.isSlash:
-        continue
-    desc = story.description.lower()
-    if "hpdm" in desc:
-        counts[0] += 1
-        print( i//25 + 1, story.title, desc )
-    if "dmhp" in desc:
-        counts[1] += 1
-    if "hp-dm" in desc:
-        counts[2] += 1
+#import undetected_chromedriver as uc
+#from selenium import webdriver
+#import time
 
-print( counts )
-"""
 
-"""
-story = db.SearchTitle("It Can't Be Love")[0]
 
-desc = story.description.lower()
-pos = desc.find( "slash" )
-if pos == -1:
-    print("no match")
+#options = webdriver.ChromeOptions() 
+#options = uc.ChromeOptions()
+#options.headless=True
+#options.add_argument('--headless')
+#options.add_argument("start-maximized")
+# driver = uc.Chrome(options=options)
+url1 = 'https://fanfiction.net/s/13952690/1/The-Devil-s-Smile'
+url2 = 'https://fanfiction.net/s/13895922/1/The-Girl-Who-Lived-Sort-Of'
+# driver.get(url1)
 
-delim = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ '
-begin = pos
-while begin >= 0 and not desc[begin] in delim:
-    begin -= 1
-begin += 1
 
-l = len(desc)
-end = pos
-while end < l and not desc[end] in delim:
-    end += 1
-    
-word = desc[begin:end]
-if NearbySafeWord( desc, pos ) or word in [ "noslash", "nonslash", "slashed", "slashes", "slashing", "femslash" ]:
-    print( "safe" )
 
-print("end")
-"""
+# f = open( "test2.html", "w" )
+# f.write( driver.page_source )
+# f.close()
+
+
+# scraper = cloudscraper.create_scraper()
+# html = scraper.get("https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10").content
+
+# s = requests.Session()
+# res = s.get('https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10')
+# cookies = dict(res.cookies)
+# res = s.post('https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10',
+#     verify=False, 
+#     cookies=cookies)
+
+# response = requests.get( "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10" )
+# f = open( 'page.html', 'w' )
+# f.write( str( html ) )
+# f.close()
+
+if __name__ == "__main__":
+    driver = uc.Chrome()
+    driver.get( url1 )  # known url using cloudflare's "under attack mode"
+
+    f = open( "test1.html", "w" )
+    f.write( driver.page_source )
+    f.close()
+
+    driver.get( url2 )  # known url using cloudflare's "under attack mode"
+    f = open( "test2.html", "w" )
+    f.write( driver.page_source )
+    f.close()

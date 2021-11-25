@@ -1,6 +1,4 @@
 import time
-import requests
-import bs4
 
 # M = Male, F = Female, U = Unknown/Unimportant
 # Sometimes authors change character genders, which would be reflecte in currentGender (if parsed correctly)
@@ -23,14 +21,6 @@ def ParseStoryDescKeyNumVal( desc, key, startPos = 0, endMarker = ' ' ):
         s = desc[start : pos]
         s = s.replace( ',', '')
         return [ int( s ), pos ]  
-
-def GetStoryChapterHTML( chapterLink ):
-    url = "https://fanfiction.net" + chapterLink
-    r = requests.get( url )
-    soup = bs4.BeautifulSoup( r.text, 'html.parser' )
-    a = soup.body.find( 'div', attrs={'id':'storytext'} )
-    return a
-
 
 def GetPrefixInCurrentSentence( string, pos, maxLen=25 ):
     begin = pos
@@ -194,38 +184,6 @@ class Story:
                     break
                 pos = desc.find( longestName, pos + 1 )
 
-        # Try to get the beginning authors note from chapter 1, if it exists / detectable.
-        html = GetStoryChapterHTML( self.story_link )
-        text = html.get_text( "\n" ).lower()
-        storyBeginKeywords = [ "chapter one", "chapter 1", "prologue" ]
-        pos = -1
-        for key in storyBeginKeywords:
-            pos = text.find( key )
-            if pos != -1:
-                text = text[:pos]
-                break
-        # Sometimes authors use a <hr> delimiter instead of "chapter 1" or whatever
-        if pos == -1:
-            if html.hr:
-                allPrevElements = list( html.hr.previous_siblings )[::-1]
-                prevText = ""
-                for element in allPrevElements:
-                    currText = ""
-                    if isinstance( element, bs4.NavigableString ):
-                        currText = str( element )
-                    else:
-                        currText = element.get_text( "\n" )
-                    currText = currText.strip()
-                    if currText != "":
-                        prevText += currText + "\n"
-                prevText = prevText.strip()
-                if prevText != "":
-                    text = prevText
-        if len(text) > 2000:
-            text = text[:2000]
-        self.chap1Beginning = text.lower()
-
-
     def __lt__( self, other ):
         return self._identifier < other._identifier
 
@@ -235,17 +193,16 @@ class Story:
     def __ne__( self, other ):
         return not( self.__eq__( self, other ) )
 
-    def __repr__( self ):
+    def __str__( self ):
+        s = "'" + self.title + "' by '" + self.author + "'"
+        
+        """
         g = "[]"
         if len( self.genres ) == 1:
             g = self.genres[0]
         if len( self.genres ) > 1:
             g = " & "
             g = g.join( self.genres )
-        
-        s = self.title
-        
-        """
         "Title: " + self.title + '\n' + \
             "Num Words: " + str( self.words ) + '\n' + \
             "Num Chapters: " + str( self.numChapters ) + '\n' + \
@@ -263,7 +220,9 @@ class Story:
             "Publish Date: " + time.strftime( '%m/%d/%Y', time.localtime( self.publishDate ) ) + '\n' + \
             "Description: " + self.description
         """
-
         return s
+
+    def __repr__( self ):        
+        return self.__str__()
         
 

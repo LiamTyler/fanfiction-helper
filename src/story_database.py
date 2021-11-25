@@ -9,7 +9,7 @@ class StoryDB:
         start = 0
         end   = len( self.stories )
         if end == 0:
-            return [ False, 0 ]
+            return -1
 
         #print( "start = ", start, ", end = ", end )
         while start < end:
@@ -20,20 +20,20 @@ class StoryDB:
             elif self.stories[mid] > story:
                 end = mid - 1
             else:
-                return [ True, mid ]
+                return mid
 
         #print( "len = ", len(self.stories), ", start = ", start, ", end = ", end )
         if start >= len( self.stories ) or start > end:
-            return [ False, start ]
+            return -1
         if self.stories[start] > story:
-            return [ False, start - 1 ]
+            return -1
         else:
-            return [ False, start ]
+            return -1
         
 
     def Exists( self, story ):
-        [ present, index ] = self.BinarySearch( story )
-        return present
+        index = self.BinarySearch( story )
+        return index != -1
     
     def SearchTitle( self, title ):
         return [ s for s in self.stories if s.title == title ]
