@@ -4,54 +4,34 @@ from story import Story, Character
 class StoryDB:
     def __init__( self, stories = [] ):
         self.stories = stories
-
-    def BinarySearch( self, story ):
-        start = 0
-        end   = len( self.stories )
-        if end == 0:
-            return -1
-
-        #print( "start = ", start, ", end = ", end )
-        while start < end:
-            #print( "start = ", start, ", end = ", end )
-            mid = ( start + end ) // 2
-            if self.stories[mid] < story:
-                start = mid + 1
-            elif self.stories[mid] > story:
-                end = mid - 1
-            else:
-                return mid
-
-        #print( "len = ", len(self.stories), ", start = ", start, ", end = ", end )
-        if start >= len( self.stories ) or start > end:
-            return -1
-        if self.stories[start] > story:
-            return -1
-        else:
-            return -1
-        
+        self.storyIdToIndexMap = {}
+        for i in range( len( stories ) ):
+            self.storyIdToIndexMap[stories[i]] = i
 
     def Exists( self, story ):
-        index = self.BinarySearch( story )
-        return index != -1
+        return story in self.storyIdToIndexMap
     
     def SearchTitle( self, title ):
         return [ s for s in self.stories if s.title == title ]
 
     def Insert( self, story ):
+        if story in self.storyIdToIndexMap:
+            return
         self.stories.append( story )
-        #[ present, index ] = self.BinarySearch( story )
-        #if present:
-        #    return
-        #self.stories = self.stories[:index] + [ story ] + self.stories[index:]
+        self.storyIdToIndexMap[story] = len( self.stories ) - 1
+
+    def GetIndex( self, story ):
+        return self.storyIdToIndexMap[story]
 
     def Serialize( self, filename ):
         with open( filename, "wb" ) as file:
             pickle.dump( self.stories, file )
+            pickle.dump( self.storyIdToIndexMap, file )
     
     def Deserialize( self, filename ):
         with open( filename, "rb" ) as file:
             self.stories = pickle.load( file )
+            self.storyIdToIndexMap = pickle.load( file )
 
 def LoadStoryDB( filename ):
     db = StoryDB()
@@ -65,12 +45,12 @@ def LoadFandomInfo( filename ):
     except:
         print( "Could not open file '" + filename + "'" )
         return ret
-    lines = [ line.strip() for line in f.readlines() if len(line) > 0 and line[0] != '#' ]
-    ret["fullname"] = lines[0]
-    ret["exclusionKeywords"] = [ x.lower() for x in lines[1].split(',') if x != '' ]
+    lines = [ line.strip() for line in f.readlines() if line[0] != '#' ]
+    ret["regularLink"] = lines[0]
+    ret["slashExclusionKeywords"] = [ x.lower() for x in lines[2].split(',') if x != '' ]
 
     genders = dict()
-    for line in lines[2:]:
+    for line in lines[4:]:
         endOfName = line.find( "\"", 1 )
         name = line[1:endOfName]
         gender = line[-1]

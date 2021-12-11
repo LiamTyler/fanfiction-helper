@@ -2,52 +2,34 @@ import requests
 import time
 from story_database import *
 import bs4
-import cloudscraper
-from cloudscraper import CloudflareChallengeError
+import undetected_chromedriver.v2 as uc
+from filters import *
 
-#htmlScraper = None
-MAX_CLOUDFLARE_ATTEMPTS = 0
-CLOUDFLARE_WAIT_TIME = 2
+g_htmlScraper = None
 
-def InitScraper():
-    pass
-    #global htmlScraper
-    #htmlScraper = cloudscraper.create_scraper( browser={'browser': 'chrome','platform': 'windows','mobile': False} )
+def GetHTMLPage( url ):
+    global g_htmlScraper
+    if not g_htmlScraper:
+        g_htmlScraper = uc.Chrome()
+    g_htmlScraper.get( url )
+    
+    page = g_htmlScraper.page_source
+    return g_htmlScraper.current_url, page
 
-def GetHTMLPage( url, htmlScraper = None ):
-    if not htmlScraper:
-        htmlScraper = cloudscraper.create_scraper( browser={'browser': 'firefox','platform': 'windows','mobile': False} )
-    page = None
-    try:
-        page = htmlScraper.get( url )
-    except CloudflareChallengeError as e:
-        #print( e, "Retrying..." )
-        for index in range( 1, MAX_CLOUDFLARE_ATTEMPTS + 1 ):
-            print( "Attempt:", index, "/", MAX_CLOUDFLARE_ATTEMPTS )
-            time.sleep(CLOUDFLARE_WAIT_TIME)
-            #htmlScraper = cloudscraper.create_scraper( browser={'browser': 'firefox','platform': 'windows','mobile': False} )
-            try:
-                page = htmlScraper.get( url )
-            except CloudflareChallengeError:
-                continue
-        if page == None:
-            print( "Could not get past CloudFlare error for URL:", url )
-        
-    return page
-
-def GetStoryChapterHTML( chapterLink ):
-    url = "https://fanfiction.net" + chapterLink
-    r = GetHTMLPage( url )
-    if r:
-        soup = bs4.BeautifulSoup( r.content, 'html.parser' )
+def GetStoryChapterHTML( story ):
+    url = story.GetUrl()
+    newUrl, text = GetHTMLPage( url )
+    if text:
+        soup = bs4.BeautifulSoup( text, 'html.parser' )
         a = soup.body.find( 'div', attrs={'id':'storytext'} )
         return a
     else:
         return ""
 
 def GetStoryFirst1KWords( story ):
+    time.sleep( 1 )
     # Try to get the beginning authors note from chapter 1, if it exists / detectable.
-    html = GetStoryChapterHTML( story.story_link )
+    html = GetStoryChapterHTML( story )
     if html == "":
         print( "Unable to get first 1K words for story:", story )
         story.chap1Beginning = ""
@@ -86,8 +68,8 @@ def ParseFFSearchPage( text, characterDB ):
     lines = text.split( '\n' )
 
     #global story_links, story_descs
-    story_links = [ x for x in lines if "class='z-list" in x ]
-    story_descs = [ x for x in lines if "class='z-indent" in x ]
+    story_links = [ x for x in lines if "class=\"z-list" in x ]
+    story_descs = [ x for x in lines if "class=\"z-indent" in x ]
 
     stories = []
     for i in range( len( story_links ) ):
@@ -97,10 +79,10 @@ def ParseFFSearchPage( text, characterDB ):
 
     return stories
 
-def DownloadStories( baseUrl, characterDB, maxPages=100000 ):
-    InitScraper()
+def DownloadStories( baseUrl, slashExclusionList, characterDB, storyDB = None, maxPages=100000 ):
     print( "Downloading stories..." )
-    storyDB  = StoryDB()
+    if storyDB == None:
+        storyDB = StoryDB()
 
     # community urls differ slightly from regular search urls
     beginUrl = baseUrl
@@ -117,26 +99,41 @@ def DownloadStories( baseUrl, characterDB, maxPages=100000 ):
         beginUrl += "&p="
 
     page = 1
+    storiesParsed = 0
     while page <= maxPages:
         url = beginUrl + str( page ) + endUrl
-        response = GetHTMLPage( url )
-        print( "Pages Parsed: ", page )
+        print( "Parsing page:", page, "/", maxPages )
+        responseUrl, responseText = GetHTMLPage( url )
 
         # If the urls dont match, then you've requested beyond the last page of stories
-        if response.url != url:
+        if responseUrl != url:
+            print( "Page", page, "does not exist" )
             break
 
-        newStories = ParseFFSearchPage( response.text, characterDB )
+        newStories = ParseFFSearchPage( responseText, characterDB )
 
+        unchangedStoriesInARow = 0
         for story in newStories:
-            #time.sleep( 5 )
-            print( "Parsing first 1K words from story:", story )
-            GetStoryFirst1KWords( story )
-            
-            storyDB.Insert( story )
-        
-        #if not page % 5:
-        #    print( "Pages Parsed: ", page )
+            if storyDB.Exists( story ):
+                if IsSlash( story, slashExclusionList ):
+                    story.SetFlag( StoryFlags.IS_SLASH_AUTO )
+                storyChanged = storyDB.stories[storyDB.GetIndex( story )].Update( story )
+                if not storyChanged:
+                    unchangedStoriesInARow += 1
+                else:
+                    unchangedStoriesInARow = 0
+                    print( "Updated metadata for story", storiesParsed, ":", story )
+            else:
+                print( "Downloading chapter 1 of story", storiesParsed, ":", story )
+                #GetStoryFirst1KWords( story )
+                if IsSlash( story, slashExclusionList ):
+                    story.SetFlag( StoryFlags.IS_SLASH_AUTO )
+                storyDB.Insert( story )
+                unchangedStoriesInARow = 0
+            storiesParsed += 1
+
+            if unchangedStoriesInARow >= 20:
+                return storyDB
         
         page += 1
 

@@ -1,8 +1,10 @@
-# Line 1: Fandom URL name. Ex: "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&r=10" -> "Harry-Potter", not "Harry Potter"
-# Line 2: Exclusion keywords from description (comma separated)
-# Line 3+: Character gender list
-My-Hero-Academia-僕のヒーローアカデミア
+# Link to process
+https://www.fanfiction.net/anime/My-Hero-Academia-%E5%83%95%E3%81%AE%E3%83%92%E3%83%BC%E3%83%AD%E3%83%BC%E3%82%A2%E3%82%AB%E3%83%87%E3%83%9F%E3%82%A2/?&srt=1&lan=1&r=10&len=10
+
+# Exclusion keywords from description (comma separated)
 BakuDeku,Katsudeku
+
+# Character gender list
 "1-A Students" U
 "1-B Students" U
 "A. Sako/Mr. Compress" M

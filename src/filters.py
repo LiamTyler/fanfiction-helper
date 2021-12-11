@@ -86,11 +86,12 @@ def IsSlash( story, keywordExclusionList=[] ):
             return 4
 
     # Rule 5: Check beginning of first chapter for Slash keyword, like rule 2.
-    val = SlashSpecific( story.chap1Beginning )
-    if val == 1:
-        return 0
-    elif val == 2:
-        return 5
+    if story.chap1Beginning != "":
+        val = SlashSpecific( story.chap1Beginning )
+        if val == 1:
+            return 0
+        elif val == 2:
+            return 5
 
     # Rules 6: if the genre == romance, every character is male, and numCharacters > 1, probably slash?
     numMales = 0

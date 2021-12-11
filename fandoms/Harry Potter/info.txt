@@ -1,8 +1,10 @@
-# Line 1: Fandom URL name. Ex: "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&r=10" -> "Harry-Potter", not "Harry Potter"
-# Line 2: Exclusion keywords from description (comma separated)
-# Line 3+: Character gender list
-Harry-Potter
+# Link to process
+https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10&len=10&c1=1&_c2=9
+
+# Exclusion keywords from description (comma separated)
 hpdm,dmhp
+
+# Character gender list
 "A. Dippet" M
 "A. Kirke" M
 "A. Lynch" M

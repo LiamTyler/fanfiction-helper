@@ -3,86 +3,63 @@ from story_database import *
 from filters import *
 from scraper import *
 from test import *
-import cloudscraper
 import undetected_chromedriver.v2 as uc
+from os.path import exists
+import os
+from gui import *
+import socket
 
-def DownloadAndSaveStories( fandomName, dbName, baseUrl, maxPages=1000000 ):
-    fandom = "fandoms/" + fandomName + "/"
-    dbName = fandom + "databases/" + dbName
-    info = LoadFandomInfo( fandom + "info.txt" )
-    characterDB = info["characterGenders"]
-    storyDB = DownloadStories( baseUrl, characterDB, maxPages )
+def ScanSingleFandom( fandomPath, maxPages=100000 ):
+    info = LoadFandomInfo( fandomPath + "info.txt" )
+    dbName = fandomPath + "databases/regular.bin"
+    if exists( dbName ):
+        storyDB = LoadStoryDB( dbName )
+    else:
+        storyDB = StoryDB()
+
+    storyDB = DownloadStories( info["regularLink"], info["slashExclusionKeywords"], info["characterGenders"], storyDB, maxPages )
     storyDB.Serialize( dbName )
 
     return storyDB
 
-#DownloadAndSaveStories( "Harry Potter", "Harry-and-Draco-s-Love-Shack.bin", "https://www.fanfiction.net/community/Harry-and-Draco-s-Love-Shack/11605/99/0/1/0/0/0/0/" )
-#DownloadAndSaveStories( "Harry Potter", "Order-of-Stories.bin", "https://www.fanfiction.net/community/Order-of-Stories/10077/99/0/1/0/0/0/0/" )
-#DownloadAndSaveStories( "My Hero Academia", "BakuDeku.bin", "https://www.fanfiction.net/community/BakuDeku/132352/99/0/1/0/0/0/0/" )
+def ScanAllFandoms():
+    dirs = [name for name in os.listdir( "fandoms/" ) if os.path.isdir( "fandoms/" + name )]
+    for fandom in dirs:
+        fandomPath = "fandoms/" + fandom + "/"
+        ScanSingleFandom( fandomPath, 1 )
 
-#db = RunTestcaseFile( "My Hero Academia", "slash1.txt" )
-#db = RunTestcaseFile( "Harry Potter", "slash1.txt" )
-#db = RunTestcaseFile( "Harry Potter", "straight1.txt" )
-#html = GetStoryChapterHTML( "/s/2721625/1/Freedom-And-Not-Peace" )
-#html = GetStoryChapterHTML( "/s/1883681/1/Meetings" )
-#html = GetStoryChapterHTML( "/s/5639518/1/The-Harem-War" )
-#story = db.SearchTitle("The Harem War")[0]
-
-#stories = DownloadAndSaveStories( "Harry Potter", "regular.bin", "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10", 1 )
-#print(stories)
-
-#htmlScraper = cloudscraper.create_scraper( browser={'browser': 'chrome','platform': 'windows','mobile': False} )
-#page = GetHTMLPage( "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10", htmlScraper )
-#page = GetHTMLPage( "https://fanfiction.net/s/13952690/1/The-Devil-s-Smile", htmlScraper )
-#page = GetHTMLPage( "https://fanfiction.net/s/13895922/1/The-Girl-Who-Lived-Sort-Of", htmlScraper )
-
-#import undetected_chromedriver as uc
-#from selenium import webdriver
-#import time
-
-
-
-#options = webdriver.ChromeOptions() 
-#options = uc.ChromeOptions()
-#options.headless=True
-#options.add_argument('--headless')
-#options.add_argument("start-maximized")
-# driver = uc.Chrome(options=options)
-url1 = 'https://fanfiction.net/s/13952690/1/The-Devil-s-Smile'
-url2 = 'https://fanfiction.net/s/13895922/1/The-Girl-Who-Lived-Sort-Of'
-# driver.get(url1)
-
-
-
-# f = open( "test2.html", "w" )
-# f.write( driver.page_source )
-# f.close()
-
-
-# scraper = cloudscraper.create_scraper()
-# html = scraper.get("https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10").content
-
-# s = requests.Session()
-# res = s.get('https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10')
-# cookies = dict(res.cookies)
-# res = s.post('https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10',
-#     verify=False, 
-#     cookies=cookies)
-
-# response = requests.get( "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10" )
-# f = open( 'page.html', 'w' )
-# f.write( str( html ) )
-# f.close()
+def Menu():
+    dirs = [name for name in os.listdir( "fandoms/" ) if os.path.isdir( "fandoms/" + name )]
+    for i in range( len( dirs ) ):
+        fandom = dirs[i]
+        fandomPath = "fandoms/" + fandom + "/"
+        info = LoadFandomInfo( fandomPath + "info.txt" )
+        print( i, ": ", fandom, ": ", info["regularLink"], sep="" )
 
 if __name__ == "__main__":
-    driver = uc.Chrome()
-    driver.get( url1 )  # known url using cloudflare's "under attack mode"
+    #if os.path.isdir( "../fandoms/" ):
+    #Menu()
+    #ScanSingleFandom( "fandoms/Harry Potter/", 4 )
+    #ScanAllFandoms()
+    #db = DownloadAndSaveStories( "Harry Potter", "regular.bin", "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10&len=10", 5 )
+    #db = LoadStoryDB( "fandoms/Harry Potter/databases/regular.bin" )
+    #print ( len( db.stories ), len( db.storyIdToIndexMap ) )
+    #for s in db.stories:
+    #    print( s )
 
-    f = open( "test1.html", "w" )
-    f.write( driver.page_source )
-    f.close()
+    #app = QApplication( [] )
+    #window = MainWindow()
+    #app.exec_()
 
-    driver.get( url2 )  # known url using cloudflare's "under attack mode"
-    f = open( "test2.html", "w" )
-    f.write( driver.page_source )
-    f.close()
+    HOST = '127.0.0.1'  # The server's hostname or IP address
+    PORT = 27015        # The port used by the server
+
+    while( 1 ):
+        data = ""
+        with socket.socket( socket.AF_INET, socket.SOCK_STREAM ) as s:
+            s.connect( (HOST, PORT) )
+            s.sendall( b'Hello, world' )
+            data = s.recv(1024)
+
+        print('Received', repr(data))
+        time.sleep( 2 )

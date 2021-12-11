@@ -1,4 +1,5 @@
 import time
+from enum import IntEnum
 
 # M = Male, F = Female, U = Unknown/Unimportant
 # Sometimes authors change character genders, which would be reflecte in currentGender (if parsed correctly)
@@ -7,6 +8,9 @@ class Character:
         self.name           = name
         self.originalGender = originalGender
         self.currentGender  = currentGender
+
+    def __eq__( self, o ):
+        return self.name == o.name and self.originalGender == o.originalGender and self.currentGender == o.currentGender
 
     def __repr__( self ):
         return "(" + self.name + ", " + self.currentGender + ")"
@@ -35,12 +39,20 @@ def GetPrefixInCurrentSentence( string, pos, maxLen=25 ):
 
     return string[begin:pos]
 
+class StoryFlags( IntEnum ):
+    IS_COMPLETE = 1,
+    IS_ABANDONED = 2,
+    IS_SLASH_AUTO = 3,
+    IS_SLASH_MANUAL = 4,
+    HAVE_READ_ENTIRELY = 5,
+    HAVE_READ_PARTIALLY = 6,
+    NOT_INTERESTED = 7,
+    INTERESTED = 8
+
 class Story:
     def __init__( self ):
         self.title          = ""
-        self.rating         = ""
-        self.words          = 0
-        self.language       = ""
+        self.rating         = "" # K, K+, T, or M
         self.author         = ""
         self.author_link    = ""
         self.description    = ""
@@ -49,22 +61,73 @@ class Story:
         self.genres         = []
         self.characters     = []
         self.pairings       = [] # indices into self.characters array
-        self.isSlash        = False
-        self.complete       = False
+        self.words          = 0
         self.numReviews     = 0
         self.numFavorites   = 0
         self.numFollows     = 0
         self.numChapters    = 0
-        self.updateDate     = 0
         self.publishDate    = 0
         self.chap1Beginning = ""
-        self.debugInfo      = ""
+        self.flags          = 0
+        self.myRating       = 0 # out of 10
+        self.updateDates    = []
+        self.wordsPerUpdate = []
+        self.personalNotes  = ""
+        self._extraInfo     = ""
         self._identifier    = ""
 
+    def HasFlag( self, flag ):
+        return self.flags & 1 << int(flag)
+
+    def SetFlag( self, flag ):
+        self.flags |= 1 << int(flag)
+
+    def ClearFlag( self, flag ):
+        if self.HasFlag( flag ):
+            self.flags -= 1 << int(flag)
+
+    def IsSlash( self ):
+        return self.HasFlag( StoryFlags.IS_SLASH_AUTO ) or self.HasFlag( StoryFlags.IS_SLASH_MANUAL )
+
+    def GetUrl( self, chap = 1 ):
+        link = "https://www.fanfiction.net/s/" + self.story_id + "/" + str( chap ) + "/"
+        return link
+
+    def Update( self, story ):
+        if self.story_id != story.story_id:
+            print( self, "and", story )
+            raise "Trying to update a story with a different story"
+
+        isDifferent = False
+        if self.updateDates[-1] != self.updateDates[-1]:
+            isDifferent = True
+            self.updateDates.append( self.updateDates[-1] )
+            self.wordsPerUpdate.append( story.words - self.words )
+        
+        if self.title != story.title: self.title == story.title; isDifferent = True;
+        if self.rating != story.rating: self.rating == story.rating; isDifferent = True;
+        if self.description != story.description: self.description == story.description; isDifferent = True;
+        if self.genres != story.genres: self.genres == story.genres; isDifferent = True;
+        if self.characters != story.characters: self.characters == story.characters; isDifferent = True;
+        if self.pairings != story.pairings: self.pairings == story.pairings; isDifferent = True;
+        if self.words != story.words: self.words == story.words; isDifferent = True;
+        if self.numChapters != story.numChapters: self.numChapters == story.numChapters; isDifferent = True;
+
+        self.numReviews = story.numReviews
+        self.numFavorites = story.numFavorites
+        self.numFollows = story.numFollows
+        if story.HasFlag( StoryFlags.IS_SLASH_AUTO ):
+            self.SetFlag( StoryFlags.IS_SLASH_AUTO )
+        
+        return isDifferent
+
     def Parse( self, titleSection, descSection, characterDB={} ):
+        div3 = descSection.find( "</div></div></div>" )
+        descSection = descSection[:div3 + len( "</div></div></div>" )]
+
         # story_link
-        pos = titleSection.find( "class=stitle")
-        start = titleSection.find( '"', pos ) + 1
+        pos = titleSection.find( '"/s/' )
+        start = pos + 1
         pos = titleSection.find( '"><img', start )
         self.story_link = titleSection[start : pos]
         self.story_id = self.story_link[3:self.story_link.find( '/', 3 )]
@@ -98,7 +161,7 @@ class Story:
         # language
         start = pos + 3
         pos = descSection.find( ' ', start )
-        self.language = descSection[start : pos]
+        #self.language = descSection[start : pos]
 
         # genres
         chap_start = descSection.find( "Chapters", pos )
@@ -118,25 +181,30 @@ class Story:
         [ self.numReviews, pos ]   = ParseStoryDescKeyNumVal( descSection, "Reviews: ", pos )
         [ self.numFavorites, pos ] = ParseStoryDescKeyNumVal( descSection, "Favs: ", pos )
         [ self.numFollows, pos ]   = ParseStoryDescKeyNumVal( descSection, "Follows: ", pos )
-        [ self.updateDate, pos ]   = ParseStoryDescKeyNumVal( descSection, "Updated: <span data-xutime='", pos, "'" )
-        [ self.publishDate, pos ]  = ParseStoryDescKeyNumVal( descSection, "Published: <span data-xutime='", pos, "'" )
-        if self.updateDate == 0:
-            self.updateDate = self.publishDate
+        [ updateDate, pos ]        = ParseStoryDescKeyNumVal( descSection, "Updated: <span data-xutime=\"", pos, '"' )
+        [ self.publishDate, pos ]  = ParseStoryDescKeyNumVal( descSection, "Published: <span data-xutime=\"", pos, '"' )
+        if updateDate == 0:
+            self.updateDates = [ self.publishDate ]
+        else:
+            self.updateDates = [ self.publishDate, updateDate ]
 
         # complete
         completePos = descSection.find( " - Complete", pos )
-        self.complete = completePos != -1
+        isComplete = False
+        if completePos != -1:
+            self.SetFlag( StoryFlags.IS_COMPLETE )
+            isComplete = True
         self._identifier = self.title + "_" + self.author + "_" + self.story_id
 
         # characters
-        pos = descSection.find( "</span>", pos ) + len( "</span>" )
-        if not self.complete and descSection[pos] != ' ':
+        pos = descSection.rfind( "</span>", pos ) + len( "</span>" )
+        if not isComplete and descSection[pos] != ' ':
             return
-        if self.complete and completePos == pos:
+        if isComplete and completePos == pos:
             return
         pos += 3
         end = descSection.find( "</div>", pos )
-        if self.complete:
+        if isComplete:
             end = completePos
 
         characterStr = descSection[pos:end]
@@ -185,13 +253,16 @@ class Story:
                 pos = desc.find( longestName, pos + 1 )
 
     def __lt__( self, other ):
-        return self._identifier < other._identifier
+        return self.story_id < other.story_id
 
     def __eq__( self, other ):
-        return self._identifier == other._identifier
+        return self.story_id == other.story_id
 
     def __ne__( self, other ):
         return not( self.__eq__( self, other ) )
+
+    def __hash__( self ):
+        return hash( self.story_id )
 
     def __str__( self ):
         s = "'" + self.title + "' by '" + self.author + "'"
