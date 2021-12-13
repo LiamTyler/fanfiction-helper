@@ -2,13 +2,15 @@
 
 #include "shared/core_defines.hpp"
 #include <string>
+#include <memory>
 #include <vector>
 
 enum class StorySource : uint8_t
 {
-    FF,
-    AO3,
-    COUNT
+    ERROR = 0,
+    FF    = 1,
+    AO3   = 2,
+    COUNT = 3
 };
 
 enum class ContentRating : uint8_t
@@ -49,6 +51,14 @@ enum class Genre : uint8_t
     COUNT
 };
 
+enum class Gender : uint8_t
+{
+    UNKNOWN,
+    MALE,
+    FEMALE,
+    OTHER
+};
+
 enum class StoryFlags : uint32_t
 {
     NONE                 = 0,
@@ -65,27 +75,32 @@ enum class StoryFlags : uint32_t
 };
 PG_DEFINE_ENUM_FLAG_OPERATORS( StoryFlags );
 
-struct Fandom
-{
-    std::string name;
-};
+using Fandom = std::string;
 using FandomIndex = uint16_t;
+constexpr FandomIndex UNKNOWN_OR_INVALID_FANDOM = 0;
 
-enum class Gender : uint8_t
-{
-    UNKNOWN,
-    MALE,
-    FEMALE,
-    OTHER
-};
+using FreeformTag = std::string;
+using FreeformTagIndex = uint32_t;
+
 
 struct Character
 {
     std::string name;
     FandomIndex fandomIndex;
     Gender gender;
+
+    bool operator==( const Character& c ) const { return name == c.name && fandomIndex == c.fandomIndex; }
 };
 using CharacterIndex = uint32_t;
+
+template <>
+struct std::hash<Character>
+{
+    size_t operator()( const Character& c ) const
+    {
+        return std::hash<std::string>()(c.name);
+    }
+};
 
 struct CharacterInstance
 {
@@ -93,11 +108,6 @@ struct CharacterInstance
     Gender currentGender;
 };
 
-struct FreeformTag
-{
-    std::string name;
-};
-using FreeformTagIndex = uint32_t;
 
 struct Relationship
 {
@@ -106,8 +116,8 @@ struct Relationship
         Romantic,
         Platonic
     };
-    CharacterIndex character1;
-    CharacterIndex character2;
+    CharacterInstance character1;
+    CharacterInstance character2;
     Type type;
 };
 
@@ -115,12 +125,15 @@ struct UpdateInfo
 {
     time_t date;
     uint32_t wordCount;
+
+    bool operator<( const UpdateInfo& u ) const { return date > u.date; }
 };
 
 class Serializer;
 
 class Story
 {
+    friend class Database;
 public:
     Story() = default;
 
@@ -130,16 +143,23 @@ public:
     const char* Title() const;
     const char* Author() const;
     const char* Description() const;
-    std::string AuthorLink() const;
+    const char* AuthorLink() const;
+    std::string AuthorLinkFull() const;
     std::string StoryLink() const;
     void Fandoms( std::vector<FandomIndex>& fandomIndices ) const;
     time_t GetLastUpdate() const;
     void Characters( std::vector<CharacterInstance>& characters ) const;
     void Relationships( std::vector<Relationship>& relationships ) const;
     void FreeformTags( std::vector<FreeformTagIndex>& freeformTagIndices ) const;
+    uint8_t FandomCount() const;
+    uint16_t UpdateCount() const;
+    uint8_t CharacterCount() const;
+    uint8_t RelationshipCount() const;
+    uint8_t FreeformTagCount() const;
 
     bool HasFlag( StoryFlags flag ) const { return (flags & flag) != StoryFlags::NONE; }
     void SetFlag( StoryFlags flag ) { flags |= flag; }
+    void RemoveFlag( StoryFlags flag ) { flags = flags & ~flag; }
     uint32_t StoryID() const { return storyID; }
     uint32_t WordCount() const { return wordCount; }
     uint32_t ReviewCount() const { return reviewCount; }
@@ -155,8 +175,8 @@ public:
     void SetMyQualityRating( int rating ) { myQualityRating = static_cast<uint8_t>( rating ); }
 
 private:
-    uint8_t* data;
-    char* chap1Beginning;
+    std::shared_ptr<uint8_t[]> data;
+    std::shared_ptr<char[]> chap1Beginning;
     time_t publishDate;
 
     // uint16_t titleIndex; always 0
@@ -169,16 +189,58 @@ private:
     uint16_t relationshipsOffset;
     uint16_t freeFormTagsOffset;
 
-    StoryFlags flags = static_cast<StoryFlags>( 0 );
-    uint32_t storyID = 0;
+    StoryFlags flags;
+    uint32_t storyID;
     uint32_t wordCount;
     uint32_t reviewCount;
     uint32_t favoritesCount;
     uint32_t followCount;
     uint16_t chapterCount;
 
-    Genre genres[2] = { Genre::NONE, Genre::NONE };
+    Genre genres[2];
     StorySource storySource;
     ContentRating contentRating;
     uint8_t myQualityRating; // out of 10
+};
+using StoryIndex = uint32_t;
+
+
+struct ParsedCharacter
+{
+    std::string name;
+    Gender genderModifier = Gender::UNKNOWN;
+};
+
+struct ParsedRelationship
+{
+    ParsedCharacter character1;
+    ParsedCharacter character2;
+    Relationship::Type type;
+};
+
+struct ParsedStory
+{
+    std::string title;
+    std::string author;
+    std::string authorLink;
+    std::string description;
+    std::vector<std::string> fandoms;
+    std::vector<ParsedCharacter> characters;
+    std::vector<ParsedRelationship> relationships;
+    std::vector<std::string> freeformTags;
+    std::vector<UpdateInfo> updateInfos;
+
+    time_t publishDate;
+    std::string chap1Beginning;
+    StoryFlags flags;
+    uint32_t storyID;
+    uint32_t wordCount;
+    uint32_t reviewCount;
+    uint32_t favoritesCount;
+    uint32_t followCount;
+    uint16_t chapterCount;
+
+    Genre genres[2];
+    StorySource storySource;
+    ContentRating contentRating;
 };

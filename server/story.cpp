@@ -4,7 +4,7 @@
 
 void Story::Serialize( Serializer* s ) const
 {
-    uint16_t* udata16 = reinterpret_cast<uint16_t*>( data );
+    uint16_t* udata16 = reinterpret_cast<uint16_t*>( data.get() );
     uint32_t dataLen = fandomsOffset;
     dataLen += 1 + sizeof( FandomIndex ) * data[fandomsOffset];
     dataLen += 2 + sizeof( UpdateInfo ) * udata16[updatesOffset];
@@ -12,13 +12,13 @@ void Story::Serialize( Serializer* s ) const
     dataLen += 1 + sizeof( Relationship ) * data[relationshipsOffset];
     dataLen += 1 + sizeof( FreeformTagIndex ) * data[freeFormTagsOffset];
     s->Write( dataLen );
-    s->Write( data, dataLen );
+    s->Write( data.get(), dataLen );
 
-    uint32_t chap1Len = chap1Beginning ? (uint32_t)strlen( chap1Beginning ) : 0;
+    uint32_t chap1Len = chap1Beginning ? (uint32_t)strlen( chap1Beginning.get() ) : 0;
     s->Write( chap1Len );
     if ( chap1Beginning )
     {
-        s->Write( chap1Beginning, chap1Len );
+        s->Write( chap1Beginning.get(), chap1Len );
     }
 
     s->Write( authorOffset );
@@ -50,15 +50,15 @@ void Story::Deserialize( Serializer* s )
 {
     uint32_t dataLen;
     s->Read( dataLen );
-    data = static_cast<uint8_t*>( malloc( dataLen ) );
-    s->Read( data, dataLen );
+    data = std::make_shared<uint8_t[]>( dataLen );
+    s->Read( data.get(), dataLen );
 
     uint32_t chap1Len;
     s->Read( chap1Len );
     if ( chap1Len )
     {
-        chap1Beginning = static_cast<char*>( malloc( chap1Len + 1 ) );
-        s->Read( chap1Beginning, chap1Len );
+        chap1Beginning = std::make_shared<char[]>( chap1Len + 1 );
+        s->Read( chap1Beginning.get(), chap1Len );
         chap1Beginning[chap1Len] = '\0';
     }
 
@@ -87,16 +87,17 @@ void Story::Deserialize( Serializer* s )
 }
 
 
-const char* Story::Title() const { return (char*)data; }
-const char* Story::Author() const { return data ? (char*)data + authorOffset : nullptr; }
-const char* Story::Description() const { return data ? (char*)data + descriptionOffset : nullptr; }
+const char* Story::Title() const { return (char*)data.get(); }
+const char* Story::Author() const { return data ? (char*)data.get() + authorOffset : nullptr; }
+const char* Story::Description() const { return data ? (char*)data.get() + descriptionOffset : nullptr; }
+const char* Story::AuthorLink() const { return data ? (char*)data.get() + authorLinkOffset : nullptr; }
 
 
-std::string Story::AuthorLink() const
+std::string Story::AuthorLinkFull() const
 {
     if ( !data )
         return "";
-    std::string authorLink = std::string( (char*)data + authorLinkOffset );
+    std::string authorLink = std::string( (char*)data.get() + authorLinkOffset );
     if ( storySource == StorySource::FF ) return "https://www.fanfiction.net/u/" + authorLink;
     else return "https://archiveofourown.org/users/" + authorLink;
 }
@@ -113,7 +114,7 @@ void Story::Fandoms( std::vector<FandomIndex>& fandomIndices ) const
 {
     uint8_t count = data[fandomsOffset];
     fandomIndices.resize( count );
-    FandomIndex* fandoms = reinterpret_cast<FandomIndex*>( data + fandomsOffset + 1 );
+    FandomIndex* fandoms = reinterpret_cast<FandomIndex*>( data.get() + fandomsOffset + 1 );
     for ( uint8_t i = 0; i < count; ++i )
     {
         fandomIndices[i] = fandoms[i];
@@ -123,7 +124,7 @@ void Story::Fandoms( std::vector<FandomIndex>& fandomIndices ) const
 
 time_t Story::GetLastUpdate() const
 {
-    return reinterpret_cast<UpdateInfo*>( data + updatesOffset + 2 )->date;
+    return reinterpret_cast<UpdateInfo*>( data.get() + updatesOffset + 2 )->date;
 }
 
 
@@ -131,7 +132,7 @@ void Story::Characters( std::vector<CharacterInstance>& characterIndices ) const
 {
     uint8_t count = data[charactersOffset];
     characterIndices.resize( count );
-    CharacterInstance* characters = reinterpret_cast<CharacterInstance*>( data + charactersOffset + 1 );
+    CharacterInstance* characters = reinterpret_cast<CharacterInstance*>( data.get() + charactersOffset + 1 );
     for ( uint8_t i = 0; i < count; ++i )
     {
         characterIndices[i] = characters[i];
@@ -143,7 +144,7 @@ void Story::Relationships( std::vector<Relationship>& relationships ) const
 {
     uint8_t count = data[relationshipsOffset];
     relationships.resize( count );
-    Relationship* rel = reinterpret_cast<Relationship*>( data + relationshipsOffset + 1 );
+    Relationship* rel = reinterpret_cast<Relationship*>( data.get() + relationshipsOffset + 1 );
     for ( uint8_t i = 0; i < count; ++i )
     {
         relationships[i] = rel[i];
@@ -155,12 +156,19 @@ void Story::FreeformTags( std::vector<FreeformTagIndex>& freeformTagIndices ) co
 {
     uint8_t count = data[freeFormTagsOffset];
     freeformTagIndices.resize( count );
-    FreeformTagIndex* tags = reinterpret_cast<FreeformTagIndex*>( data + freeFormTagsOffset + 1 );
+    FreeformTagIndex* tags = reinterpret_cast<FreeformTagIndex*>( data.get() + freeFormTagsOffset + 1 );
     for ( uint8_t i = 0; i < count; ++i )
     {
         freeformTagIndices[i] = tags[i];
     }
 }
+
+
+uint8_t Story::FandomCount() const { return data[fandomsOffset]; }
+uint16_t Story::UpdateCount() const { return ((uint16_t*)data.get())[updatesOffset]; }
+uint8_t Story::CharacterCount() const { return data[charactersOffset]; }
+uint8_t Story::RelationshipCount() const { return data[relationshipsOffset]; }
+uint8_t Story::FreeformTagCount() const { return data[freeFormTagsOffset]; }
 
 
 void Story::Genres( std::vector<Genre>& outGenres ) const

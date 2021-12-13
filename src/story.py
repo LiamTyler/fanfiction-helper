@@ -56,7 +56,6 @@ class Story:
         self.author         = ""
         self.author_link    = ""
         self.description    = ""
-        self.story_link     = ""
         self.story_id       = ""
         self.genres         = []
         self.characters     = []
@@ -71,10 +70,7 @@ class Story:
         self.flags          = 0
         self.myRating       = 0 # out of 10
         self.updateDates    = []
-        self.wordsPerUpdate = []
-        self.personalNotes  = ""
-        self._extraInfo     = ""
-        self._identifier    = ""
+        self.storySource    = "" # FF or AO3
 
     def HasFlag( self, flag ):
         return self.flags & 1 << int(flag)
@@ -93,35 +89,12 @@ class Story:
         link = "https://www.fanfiction.net/s/" + self.story_id + "/" + str( chap ) + "/"
         return link
 
-    def Update( self, story ):
-        if self.story_id != story.story_id:
-            print( self, "and", story )
-            raise "Trying to update a story with a different story"
+    def GetNetworkRepr( self ):
+        d = self.title.encode() + b'\0' + self.author.encode() + b'\0'
+        return d
 
-        isDifferent = False
-        if self.updateDates[-1] != self.updateDates[-1]:
-            isDifferent = True
-            self.updateDates.append( self.updateDates[-1] )
-            self.wordsPerUpdate.append( story.words - self.words )
-        
-        if self.title != story.title: self.title == story.title; isDifferent = True;
-        if self.rating != story.rating: self.rating == story.rating; isDifferent = True;
-        if self.description != story.description: self.description == story.description; isDifferent = True;
-        if self.genres != story.genres: self.genres == story.genres; isDifferent = True;
-        if self.characters != story.characters: self.characters == story.characters; isDifferent = True;
-        if self.pairings != story.pairings: self.pairings == story.pairings; isDifferent = True;
-        if self.words != story.words: self.words == story.words; isDifferent = True;
-        if self.numChapters != story.numChapters: self.numChapters == story.numChapters; isDifferent = True;
-
-        self.numReviews = story.numReviews
-        self.numFavorites = story.numFavorites
-        self.numFollows = story.numFollows
-        if story.HasFlag( StoryFlags.IS_SLASH_AUTO ):
-            self.SetFlag( StoryFlags.IS_SLASH_AUTO )
-        
-        return isDifferent
-
-    def Parse( self, titleSection, descSection, characterDB={} ):
+    def ParseFF( self, titleSection, descSection ):
+        self.storySource = "FF"
         div3 = descSection.find( "</div></div></div>" )
         descSection = descSection[:div3 + len( "</div></div></div>" )]
 
@@ -129,8 +102,8 @@ class Story:
         pos = titleSection.find( '"/s/' )
         start = pos + 1
         pos = titleSection.find( '"><img', start )
-        self.story_link = titleSection[start : pos]
-        self.story_id = self.story_link[3:self.story_link.find( '/', 3 )]
+        story_link = titleSection[start : pos]
+        self.story_id = story_link[3:story_link.find( '/', 3 )]
 
         # title
         start = titleSection.find( '>', pos + 2 ) + 1
@@ -231,11 +204,6 @@ class Story:
 
         # update genders for characters
         for character in self.characters:
-            if character.name not in characterDB:
-                continue
-            dbGender = characterDB[character.name]
-            character.originalGender = dbGender
-            character.currentGender = dbGender
             # check the description to see if any of the genders were swapped
             desc = self.description
             firstAndLast = character.name.split( ' ' )

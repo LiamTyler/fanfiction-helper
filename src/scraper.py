@@ -4,6 +4,7 @@ from story_database import *
 import bs4
 import undetected_chromedriver.v2 as uc
 from filters import *
+import socket
 
 g_htmlScraper = None
 
@@ -64,7 +65,7 @@ def GetStoryFirst1KWords( story ):
         text = text[:2000]
     story.chap1Beginning = text.lower()
 
-def ParseFFSearchPage( text, characterDB ):
+def ParseFFSearchPage( text ):
     lines = text.split( '\n' )
 
     #global story_links, story_descs
@@ -74,15 +75,16 @@ def ParseFFSearchPage( text, characterDB ):
     stories = []
     for i in range( len( story_links ) ):
         s = Story()
-        s.Parse(story_links[i], story_descs[i], characterDB )
+        s.ParseFF( story_links[i], story_descs[i] )
         stories.append( s )
 
     return stories
 
-def DownloadStories( baseUrl, slashExclusionList, characterDB, storyDB = None, maxPages=100000 ):
+def DownloadFFNetStories( baseUrl, maxPages=100000 ):
     print( "Downloading stories..." )
-    if storyDB == None:
-        storyDB = StoryDB()
+
+    HOST = '127.0.0.1'  # The server's hostname or IP address
+    PORT = 27015        # The port used by the server
 
     # community urls differ slightly from regular search urls
     beginUrl = baseUrl
@@ -94,12 +96,11 @@ def DownloadStories( baseUrl, slashExclusionList, characterDB, storyDB = None, m
             i -= 1
             numForwardSlashes += baseUrl[i] == '/'
         beginUrl = baseUrl[:i+1]
-        endUrl = baseUrl[baseUrl.find( '/', i+1):]
+        endUrl = baseUrl[baseUrl.find( '/', i+1 ):]
     else:
         beginUrl += "&p="
 
     page = 1
-    storiesParsed = 0
     while page <= maxPages:
         url = beginUrl + str( page ) + endUrl
         print( "Parsing page:", page, "/", maxPages )
@@ -110,31 +111,17 @@ def DownloadStories( baseUrl, slashExclusionList, characterDB, storyDB = None, m
             print( "Page", page, "does not exist" )
             break
 
-        newStories = ParseFFSearchPage( responseText, characterDB )
+        newStories = ParseFFSearchPage( responseText )
 
-        unchangedStoriesInARow = 0
         for story in newStories:
-            if storyDB.Exists( story ):
-                if IsSlash( story, slashExclusionList ):
-                    story.SetFlag( StoryFlags.IS_SLASH_AUTO )
-                storyChanged = storyDB.stories[storyDB.GetIndex( story )].Update( story )
-                if not storyChanged:
-                    unchangedStoriesInARow += 1
-                else:
-                    unchangedStoriesInARow = 0
-                    print( "Updated metadata for story", storiesParsed, ":", story )
+            data = story.GetNetworkRepr()
+            #data = str( len( data ) + 1 ).encode() + b'\0' + str( 1 ).encode() + b'\0' + data
+            data = str( 1 ).encode() + b'\0' + data
+            s = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
+            if not s:
+                print( "Could not create socket" )
             else:
-                print( "Downloading chapter 1 of story", storiesParsed, ":", story )
-                #GetStoryFirst1KWords( story )
-                if IsSlash( story, slashExclusionList ):
-                    story.SetFlag( StoryFlags.IS_SLASH_AUTO )
-                storyDB.Insert( story )
-                unchangedStoriesInARow = 0
-            storiesParsed += 1
-
-            if unchangedStoriesInARow >= 20:
-                return storyDB
-        
+                s.connect( (HOST, PORT) )
+                s.sendall( data )
+                    
         page += 1
-
-    return storyDB

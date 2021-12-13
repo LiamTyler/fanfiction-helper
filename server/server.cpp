@@ -1,5 +1,6 @@
 #include "server.hpp"
 #include "shared/logger.hpp"
+#include "story.hpp"
 #include <thread>
 
 #if USING ( WINDOWS_PROGRAM )
@@ -13,7 +14,10 @@
 #endif // #else // #if USING ( WINDOWS_PROGRAM )
 
 static bool s_serverShouldStop;
-static SOCKET s_clientSocket;
+constexpr uint32_t MAX_CLIENTS = 40;
+static SOCKET s_clientSockets[MAX_CLIENTS];
+static std::thread s_clientThreads[MAX_CLIENTS];
+static uint32_t s_numClients;
 static SOCKET s_listenSocket;
 static std::thread s_serverThread;
 static bool s_initialized;
@@ -34,7 +38,6 @@ bool Init()
     int iResult;
 
     s_listenSocket = INVALID_SOCKET;
-    s_clientSocket = INVALID_SOCKET;
 
     struct addrinfo *result = NULL;
     struct addrinfo hints;
@@ -88,6 +91,10 @@ bool Init()
         WSACleanup();
         return false;
     }
+    for ( uint32_t i = 0; i < MAX_CLIENTS; ++i )
+    {
+        s_clientSockets[i] = INVALID_SOCKET;
+    }
     s_initialized = true;
     s_serverThread = std::thread( ListenForCommands );
 
@@ -100,14 +107,20 @@ void Shutdown()
     if ( s_initialized )
     {
         s_serverShouldStop = true;
-        if ( s_clientSocket != INVALID_SOCKET )
+        
+        for ( uint32_t i = 0; i < MAX_CLIENTS; ++i )
         {
-            int result = shutdown( s_clientSocket, SD_SEND );
-            if ( result == SOCKET_ERROR )
+            auto socket = s_clientSockets[i];
+            if ( socket != INVALID_SOCKET )
             {
-                LOG_ERR( "Failed to shutdown client socket with error: %d", WSAGetLastError() );
+                int result = shutdown( socket, SD_SEND );
+                if ( result == SOCKET_ERROR )
+                {
+                    LOG_ERR( "Failed to shutdown client socket with error: %d", WSAGetLastError() );
+                }
+                closesocket( socket );
             }
-            closesocket( s_clientSocket );
+            s_clientThreads[i].join();
         }
         closesocket( s_listenSocket );
         s_serverThread.join();
@@ -118,72 +131,122 @@ void Shutdown()
 
 } // namespace server
 
+enum ServerCmds : uint32_t
+{
+    INVALID_OR_MISSING  = 0,
+    UPDATE_OR_ADD_STORY = 1,
+
+    COUNT
+};
+
+static bool AddOrUpdateStory( char* data )
+{
+    ParsedStory pStory;
+    pStory.title = std::string( data );
+    data += pStory.title.length() + 1;
+    pStory.author = std::string( data );
+    data += pStory.title.length() + 1;
+}
+
+static void HandleClient( uint32_t clientIndex )
+{
+    SOCKET clientSocket = s_clientSockets[clientIndex];
+    constexpr int recvBufferLen = 65536;
+    char recvBuffer[recvBufferLen];
+    bool clientConnected = true;
+    while ( clientConnected && !s_serverShouldStop )
+    {
+        int bytesReceived = recv( clientSocket, recvBuffer, recvBufferLen, 0 );
+        if ( bytesReceived == -1 )
+        {
+            int err = WSAGetLastError();
+            if ( err == WSAETIMEDOUT || errno == WSAEWOULDBLOCK )
+            {
+                continue;
+            }
+        }
+        if ( bytesReceived > 0 )
+        {
+            char* data = recvBuffer;
+            uint32_t cmd = strtoul( recvBuffer, &data, 0 );
+            if ( cmd == INVALID_OR_MISSING )
+            {
+                LOG_ERR( "Command from client could not be processed, or was missing" );
+                break;
+            }
+            ++data;
+            //LOG( "Server recieved msg of cmd %u: '%s'", cmd, data );
+            if ( cmd == UPDATE_OR_ADD_STORY )
+            {
+
+            }
+            else
+            {
+                LOG_ERR( "Unknown client cmd %u", cmd );
+            }
+
+            //std::string sendMsg = "message recieved";
+            //int iSendResult = send( s_clientSocket, sendMsg.c_str(), (int)sendMsg.length() + 1, 0 );
+            //if ( iSendResult == SOCKET_ERROR )
+            //{
+            //    LOG_ERR( "send failed with error: %d", WSAGetLastError() );
+            //    clientConnected = false;
+            //}
+        }
+        else if ( bytesReceived == 0 )
+        {
+            LOG( "Client closed connection" );
+            clientConnected = false;
+        }
+        else if ( bytesReceived == -1 )
+        {
+            int err = WSAGetLastError();
+            if ( err != WSAEINTR )
+            {
+                LOG_ERR( "HandleClient: recv failed with error: %d", WSAGetLastError() );
+            }
+            clientConnected = false;
+        }
+    }
+    closesocket( clientSocket );
+    s_clientSockets[clientIndex] = INVALID_SOCKET;
+}
+
 static void ListenForCommands() 
 {
     while ( !s_serverShouldStop )
     {
-        LOG( "Waiting for client..." );
-        s_clientSocket = accept( s_listenSocket, NULL, NULL );
-        if ( s_clientSocket == INVALID_SOCKET )
+        //LOG( "Waiting for client..." );
+        SOCKET clientSocket = accept( s_listenSocket, NULL, NULL );
+        if ( clientSocket == INVALID_SOCKET )
         {
             if ( !s_serverShouldStop )
             {
-                LOG_ERR( "Accept failed with error: %d", WSAGetLastError() );
+                LOG_ERR( "ListenForCommands: accept( s_listenSocket ) failed with error: %d", WSAGetLastError() );
             }
             continue;
         }
-        LOG( "Client connected, waiting for client message" );
+        //LOG( "Client connected, waiting for client message" );
 
-        // make recv unblock itself every so often to see if the program is trying to shutdown
-        timeval timeout;
-        timeout.tv_sec  = 500; // milliseconds
-        timeout.tv_usec = 0;
-        if ( setsockopt( s_clientSocket, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof( timeout ) ) == SOCKET_ERROR )
+        uint32_t i = 0;
+        for ( ; i < MAX_CLIENTS; ++i )
         {
-            LOG_ERR( "Could not set client socket to be non-blocking!" );
-        }
-
-        const int recvBufferLen = 1024;
-        char recvBuffer[recvBufferLen];
-        bool clientConnected = true;
-        while ( clientConnected && !s_serverShouldStop )
-        {
-            int bytesReceived = recv( s_clientSocket, recvBuffer, recvBufferLen, 0 );
-            if ( bytesReceived == -1 )
+            if ( s_clientThreads[i].joinable() )
             {
-                int err = WSAGetLastError();
-                if ( err == WSAETIMEDOUT || errno == WSAEWOULDBLOCK )
-                {
-                    continue;
-                }
+                s_clientThreads[i].join();
+                --s_numClients;
             }
-            if ( bytesReceived > 0 )
+            if ( s_clientSockets[i] == INVALID_SOCKET )
             {
-                LOG( "Server recieved '%s'", recvBuffer );
-
-                std::string sendMsg = "message recieved";
-                int iSendResult = send( s_clientSocket, sendMsg.c_str(), (int)sendMsg.length() + 1, 0 );
-                if ( iSendResult == SOCKET_ERROR )
-                {
-                    LOG_ERR( "send failed with error: %d", WSAGetLastError() );
-                    clientConnected = false;
-                }
-            }
-            else if ( bytesReceived == 0 )
-            {
-                LOG( "Client closed connection" );
-                clientConnected = false;
-            }
-            else if ( bytesReceived == -1 )
-            {
-                int err = WSAGetLastError();
-                if ( err != WSAEINTR )
-                {
-                    LOG_ERR( "recv failed with error: %d", WSAGetLastError() );
-                }
-                clientConnected = false;
+                ++s_numClients;
+                s_clientSockets[i] = clientSocket;
+                s_clientThreads[i] = std::thread( HandleClient, i );
+                break;
             }
         }
-        closesocket( s_clientSocket );
+        if ( i == MAX_CLIENTS )
+        {
+            LOG_ERR( "Server is already processing the max of %u clients, none available currently! Skipping connection", MAX_CLIENTS );
+        }
     }
 }
