@@ -5,40 +5,37 @@
 #include "shared/serializer.hpp"
 #include <algorithm>
 #include <functional>
-#include <mutex>
 
 
 Database::Database()
 {
+    m_storiesDirty = m_fandomsDirty = m_tagsDirty = m_charactersDirty = m_stopAutosave = false;
+}
+
+
+void Database::Shutdown()
+{
+    m_stopAutosave = true;
+    m_autosaveThread.join();
 }
 
 
 void Database::Load( const std::string& dbName )
 {
+    m_storiesDirty = m_fandomsDirty = m_tagsDirty = m_charactersDirty = m_stopAutosave = false;
+    m_dbName = dbName;
     std::string storyDBName        = dbName + "_stories.bin";
     std::string charactersDBName   = dbName + "_characters.txt";
     std::string fandomsDBName      = dbName + "_fandoms.txt";
     std::string freeformtagsDBName = dbName + "_freeformTags.txt";
 
-    std::string backup_storyDBName        = dbName + "_stories_BACKUP.bin";
-    std::string backup_charactersDBName   = dbName + "_characters_BACKUP.txt";
-    std::string backup_fandomsDBName      = dbName + "_fandoms_BACKUP.txt";
-    std::string backup_freeformtagsDBName = dbName + "_freeformTags_BACKUP.txt";
-    if ( PathExists( backup_storyDBName ) || PathExists( backup_charactersDBName ) || PathExists( backup_fandomsDBName ) || PathExists( backup_freeformtagsDBName ) )
+    Serializer s;
+    if ( !s.OpenForRead( storyDBName ) )
     {
-        LOG_WARN( "BACKUP DB for %s found! Program likely crashed/exited when it was mid-save. Loading backup...", dbName.c_str() );
-        CopyFile( storyDBName, backup_storyDBName, true );
-        CopyFile( charactersDBName, backup_charactersDBName, true );
-        CopyFile( fandomsDBName, backup_fandomsDBName, true );
-        CopyFile( freeformtagsDBName, backup_freeformtagsDBName, true );
-        DeleteFile( backup_storyDBName );
-        DeleteFile( backup_charactersDBName );
-        DeleteFile( backup_fandomsDBName );
-        DeleteFile( backup_freeformtagsDBName );
+        LOG_WARN( "No database with name %s found. Continuing with new database...", dbName.c_str() );
+        return;
     }
 
-    Serializer s;
-    s.OpenForRead( storyDBName );
     uint32_t numStories;
     s.Read( numStories );
     stories.resize( numStories );
@@ -91,25 +88,20 @@ void Database::Load( const std::string& dbName )
             freeformTags.push_back( line );
         }
     }
+
+    m_autosaveThread = std::thread( &Database::Autosave, this );
 }
 
 
-void Database::Serialize( const std::string& dbName ) const
+void Database::Serialize( const std::string& dbName )
 {
-    CopyFile( dbName + "_stories.bin",      dbName + "_stories_BACKUP.bin",      true );
-    CopyFile( dbName + "_characters.txt",   dbName + "_characters_BACKUP.txt",   true );
-    CopyFile( dbName + "_fandoms.txt",      dbName + "_fandoms_BACKUP.txt",      true );
-    CopyFile( dbName + "_freeformTags.txt", dbName + "_freeformTags_BACKUP.txt", true );
-
-    Serializer s;
-    s.OpenForWrite( dbName + "_stories.bin" );
-    uint32_t numStories = static_cast<uint32_t>( stories.size() );
-    s.Write( numStories );
-    for ( uint32_t i = 0; i < numStories; ++i )
+    m_lock.lock();
+    if ( m_charactersDirty || m_fandomsDirty || m_tagsDirty || m_storiesDirty )
     {
-        stories[i].Serialize( &s );
+        LOG( "Serializing %s", dbName.c_str() );
     }
 
+    if ( m_charactersDirty )
     {
         char genderStr[] = { 'U', 'M', 'F', 'O' };
         std::ofstream in( dbName + "_characters.txt" );
@@ -117,28 +109,42 @@ void Database::Serialize( const std::string& dbName ) const
         {
             in << c.name << ',' << genderStr[(uint8_t)c.gender] << ',' << std::to_string( c.fandomIndex ) << "\n";
         }
+        m_charactersDirty = false;
     }
 
+    if ( m_fandomsDirty )
     {
         std::ofstream in( dbName + "_fandoms.txt" );
         for ( const auto& f : fandoms )
         {
             in << f << "\n";
         }
+        m_fandomsDirty = false;
     }
 
+    if ( m_tagsDirty )
     {
         std::ofstream in( dbName + "_freeformTags.txt" );
         for ( const auto& f : freeformTags )
         {
             in << f << "\n";
         }
+        m_tagsDirty = false;
     }
 
-    DeleteFile( dbName + "_stories.bin" );
-    DeleteFile( dbName + "_characters.txt" );
-    DeleteFile( dbName + "_fandoms.txt" );
-    DeleteFile( dbName + "_freeformTags.txt" );
+    if ( m_storiesDirty )
+    {
+        Serializer s;
+        s.OpenForWrite( dbName + "_stories.bin" );
+        uint32_t numStories = static_cast<uint32_t>( stories.size() );
+        s.Write( numStories );
+        for ( uint32_t i = 0; i < numStories; ++i )
+        {
+            stories[i].Serialize( &s );
+        }
+        m_storiesDirty = false;
+    }
+    m_lock.unlock();
 }
 
 
@@ -152,10 +158,12 @@ static bool FandomListFind( uint8_t numFandoms, FandomIndex* fandoms, FandomInde
 }
 
 
-StoryIndex Database::AddOrUpdateStory( const ParsedStory& pStory, bool& updated, bool& needsChap1 )
-{   size_t hash = (static_cast<size_t>( pStory.storySource ) << 32) + pStory.storyID;
-    uint32_t index = 0;
+StoryIndex Database::AddOrUpdateStory( const ParsedStory& pStory, bool& shouldServerKeepUpdating, bool& needsChap1 )
+{
+    StoryIndex storyIndex = 0;
+    size_t hash = (static_cast<size_t>( pStory.storySource ) << 32) + pStory.storyID;
     auto it = storyHashToIndexMap.find( hash );
+    bool dirty = false;
     if ( it != storyHashToIndexMap.end() )
     {
         Story& story = stories[it->second];
@@ -165,7 +173,7 @@ StoryIndex Database::AddOrUpdateStory( const ParsedStory& pStory, bool& updated,
         uint16_t data2Len = newStory.freeFormTagsOffset + newStory.data[newStory.freeFormTagsOffset] * sizeof( FreeformTagIndex );
         if ( data1Len != data2Len || memcmp( story.data.get(), newStory.data.get(), data1Len ) )
         {
-            updated = true;
+            shouldServerKeepUpdating = dirty = true;
             ParsedStory combinedData = pStory;
             UpdateInfo* updates = reinterpret_cast<UpdateInfo*>( story.data.get() + story.updatesOffset + 2 );
             for ( uint16_t i = 0; i < story.UpdateCount(); ++i )
@@ -184,36 +192,55 @@ StoryIndex Database::AddOrUpdateStory( const ParsedStory& pStory, bool& updated,
             else story.RemoveFlag( StoryFlags::IS_COMPLETE );
         }
         else
-        {
-            updated = false;
+        { 
+            dirty = false;
             if ( !pStory.chap1Beginning.empty() )
             {
                 story.chap1Beginning = std::make_shared<char[]>( pStory.chap1Beginning.length() + 1 );
                 strcpy( story.chap1Beginning.get(), pStory.chap1Beginning.c_str() );
+                dirty = true;
             }
+            dirty = dirty || story.wordCount != pStory.wordCount;
+            dirty = dirty || story.reviewCount != pStory.reviewCount;
+            dirty = dirty || story.favoritesCount != pStory.favoritesCount;
+            dirty = dirty || story.followCount != pStory.followCount;
+            dirty = dirty || story.chapterCount != pStory.chapterCount;
+            dirty = dirty || story.genres[0] != pStory.genres[0];
+            dirty = dirty || story.genres[1] != pStory.genres[1];
+            dirty = dirty || story.contentRating != pStory.contentRating;
+            dirty = dirty || ((story.flags & StoryFlags::IS_COMPLETE) != (pStory.flags & StoryFlags::IS_COMPLETE));
 
-            story.wordCount = pStory.wordCount;
-            story.reviewCount = pStory.reviewCount;
-            story.favoritesCount = pStory.favoritesCount;
-            story.followCount = pStory.followCount;
-            story.chapterCount = pStory.chapterCount;
-            story.genres[0] = pStory.genres[0];
-            story.genres[1] = pStory.genres[1];
-            story.contentRating = pStory.contentRating;
-            if ( (pStory.flags & StoryFlags::IS_COMPLETE) != StoryFlags::NONE ) story.SetFlag( StoryFlags::IS_COMPLETE );
-            else story.RemoveFlag( StoryFlags::IS_COMPLETE );
+            shouldServerKeepUpdating = story.wordCount != pStory.wordCount || story.chapterCount != pStory.chapterCount;
+
+            if ( dirty )
+            {
+                story.wordCount = pStory.wordCount;
+                story.reviewCount = pStory.reviewCount;
+                story.favoritesCount = pStory.favoritesCount;
+                story.followCount = pStory.followCount;
+                story.chapterCount = pStory.chapterCount;
+                story.genres[0] = pStory.genres[0];
+                story.genres[1] = pStory.genres[1];
+                story.contentRating = pStory.contentRating;
+                if ( (pStory.flags & StoryFlags::IS_COMPLETE) != StoryFlags::NONE ) story.SetFlag( StoryFlags::IS_COMPLETE );
+                else story.RemoveFlag( StoryFlags::IS_COMPLETE );
+            }
         }
         
         needsChap1 = story.chap1Beginning == nullptr;
-        return it->second;
+        storyIndex = it->second;
     }
     else
     {
-        needsChap1 = updated = true;
+        needsChap1 = shouldServerKeepUpdating = true;
         Story newStory = StoryFromParsedData( pStory );
         stories.push_back( newStory );
-        return static_cast<StoryIndex>( stories.size() - 1 );
-    }    
+        storyIndex = static_cast<StoryIndex>( stories.size() - 1 );
+    }
+    
+    m_storiesDirty = m_storiesDirty || dirty;
+
+    return storyIndex;
 }
 
 
@@ -437,4 +464,28 @@ Story Database::StoryFromParsedData( const ParsedStory& pStory )
     newStory.myQualityRating = 0xFF;
 
     return newStory;
+}
+
+
+void Database::Autosave()
+{
+    while ( !m_stopAutosave )
+    {
+        float secondsElapsed = 0;
+        auto begin = std::chrono::steady_clock::now();
+        while ( !m_stopAutosave && secondsElapsed < 60 )
+        {
+            auto end = std::chrono::steady_clock::now();
+            std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
+            secondsElapsed += std::chrono::duration_cast<std::chrono::seconds>( end - begin ).count();
+        }
+        Serialize( m_dbName );
+    }
+}
+
+
+static Database s_database;
+Database* G_GetDatabase()
+{
+    return &s_database;
 }

@@ -1,6 +1,7 @@
+#include "database.hpp"
 #include "shared/logger.hpp"
-#include "story.hpp"
 #include "server.hpp"
+#include "story.hpp"
 #include <iostream>
 #include <thread>
 
@@ -10,20 +11,15 @@ int main()
     Logger_AddLogLocation( "stdout", stdout );
     Logger_AddLogLocation( "log_serverCPP", "log_serverCPP.txt" );
 
+    G_GetDatabase()->Load( "database" );
     server::Init();
+
     std::string a;
-    //std::this_thread::sleep_for( std::chrono::seconds( 5 ) ) ;
-    while ( 1 )
+    while ( a != "exit" )
     {
         std::cin >> a;
-        if ( a.length() )
-        {
-            break;
-        }
     }
-    sizeof( Story );
-    sizeof( uint8_t* );
-    sizeof( std::shared_ptr<uint8_t[]> );
     server::Shutdown();
+    G_GetDatabase()->Shutdown();
     return 0;
 }

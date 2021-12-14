@@ -120,7 +120,10 @@ void Shutdown()
                 }
                 closesocket( socket );
             }
-            s_clientThreads[i].join();
+            if ( s_clientThreads[i].joinable() )
+            {
+                s_clientThreads[i].join();
+            }
         }
         closesocket( s_listenSocket );
         s_serverThread.join();

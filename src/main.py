@@ -20,7 +20,7 @@ def ScanAllFandoms():
         ScanSingleFandom( fandomPath, 1 )
 
 if __name__ == "__main__":
-    DownloadFFNetStories( "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10&len=10&c1=1&_c1=6&_c2=9", 1 )
+    DownloadFFNetStories( "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&r=10", 1 )
     #ScanAllFandoms()
 
     """
