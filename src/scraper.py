@@ -5,6 +5,10 @@ import bs4
 import undetected_chromedriver.v2 as uc
 from filters import *
 import socket
+import os
+
+def ShouldShutdown():
+    return os.path.exists( "shutdown.txt" )
 
 g_htmlScraper = None
 
@@ -96,7 +100,7 @@ def ParseFFSearchPage( url, text ):
     return stories
 
 def DownloadFFNetStories( baseUrl, maxPages=100000 ):
-    print( "Downloading stories..." )
+    #print( "Downloading stories..." )
 
     HOST = '127.0.0.1'  # The server's hostname or IP address
     PORT = 27015        # The port used by the server
@@ -106,15 +110,22 @@ def DownloadFFNetStories( baseUrl, maxPages=100000 ):
     page = 1
     while page <= maxPages:
         url = beginUrl + str( page )
-        print( "Parsing page:", page, "/", maxPages )
+        #print( "Parsing page:", page, "/", maxPages )
         responseUrl, responseText = GetHTMLPage( url )
 
         # If the urls dont match, then you've requested beyond the last page of stories
+        # Note: used to be true, doesnt seem to be anymore?
         if responseUrl != url:
-            print( "Page", page, "does not exist" )
+            print( "Reached final page, done processing stories for URL:", baseUrl )
             break
 
         newStories = ParseFFSearchPage( baseUrl, responseText )
+        if len( newStories ) == 0:
+            print( "Reached final page, done processing stories for URL:", baseUrl )
+            break
+            
+        if ShouldShutdown():
+            break
 
         for story in newStories:
             #print( "Sending Story:\n", story )

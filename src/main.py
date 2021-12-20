@@ -24,12 +24,6 @@ if __name__ == "__main__":
     print( "Python Scraper spawned" )
     DownloadFFNetStories( "https://www.fanfiction.net/game/League-of-Legends/?&srt=1&lan=1&r=10&len=1" )
     #DownloadFFNetStories( "https://www.fanfiction.net/Tiger-Bunny-%E3%82%BF%E3%82%A4%E3%82%AC%E3%83%BC-%E3%83%90%E3%83%8B%E3%83%BC-Crossovers/8401/0/", 1 )
-    
-    # while True:
-    #     if os.path.exists( "shutdown.txt" ):
-    #         print( "Closing" )
-    #         break
-    #     time.sleep( 1 )
 
     print( "Python Scraper closing" )
 
