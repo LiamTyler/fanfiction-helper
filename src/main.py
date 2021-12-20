@@ -20,26 +20,31 @@ def ScanAllFandoms():
         ScanSingleFandom( fandomPath, 1 )
 
 if __name__ == "__main__":
-    DownloadFFNetStories( "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&r=10", 1 )
     #ScanAllFandoms()
+    print( "Python Scraper spawned" )
+    DownloadFFNetStories( "https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10&len=10&c1=1&c2=3&c3=349&_c1=6&_c2=9", 1 )
+    #DownloadFFNetStories( "https://www.fanfiction.net/Tiger-Bunny-%E3%82%BF%E3%82%A4%E3%82%AC%E3%83%BC-%E3%83%90%E3%83%8B%E3%83%BC-Crossovers/8401/0/", 1 )
+    
+    # while True:
+    #     if os.path.exists( "shutdown.txt" ):
+    #         print( "Closing" )
+    #         break
+    #     time.sleep( 1 )
 
-    """
-    s = Story()
-    s.title = "Hello"
-    s.author = "World"
+    print( "Python Scraper closing" )
 
-    HOST = '127.0.0.1'  # The server's hostname or IP address
-    PORT = 27015        # The port used by the server
-    data = s.GetNetworkRepr()
-    sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
-    if not sock:
-        print( "Could not create socket" )
-    else:
-        sock.connect( (HOST, PORT) )
-        time.sleep( 10 )
-        sock.sendall( data )
-    """
+    
+    # s = Story()
+    # s.title = "Hello"
+    # s.author = "World"
 
-    #app = QApplication( [] )
-    #window = MainWindow()
-    #app.exec_()
+    # HOST = '127.0.0.1'  # The server's hostname or IP address
+    # PORT = 27015        # The port used by the server
+    # data = s.GetNetworkRepr()
+    # sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
+    # if not sock:
+    #     print( "Could not create socket" )
+    # else:
+    #     sock.connect( (HOST, PORT) )
+    #     time.sleep( 10 )
+    #     sock.sendall( data )

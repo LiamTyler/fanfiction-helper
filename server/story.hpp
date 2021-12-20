@@ -51,6 +51,8 @@ enum class Genre : uint8_t
     COUNT
 };
 
+Genre GenreFromString( const std::string& str );
+
 enum class Gender : uint8_t
 {
     UNKNOWN,
@@ -77,7 +79,7 @@ PG_DEFINE_ENUM_FLAG_OPERATORS( StoryFlags );
 
 using Fandom = std::string;
 using FandomIndex = uint16_t;
-constexpr FandomIndex UNKNOWN_OR_INVALID_FANDOM = 0;
+constexpr FandomIndex UNKNOWN_OR_INVALID_FANDOM = UINT16_MAX;
 
 using FreeformTag = std::string;
 using FreeformTagIndex = uint32_t;

@@ -6,6 +6,13 @@
 #include <algorithm>
 #include <functional>
 
+#define DEBUG_DATABASE IN_USE
+#if USING( DEBUG_DATABASE )
+#define DLOG( ... ) LOG( __VA_ARGS__ )
+#else
+#define DLOG( ... )
+#endif // 
+
 
 Database::Database()
 {
@@ -16,7 +23,14 @@ Database::Database()
 void Database::Shutdown()
 {
     m_stopAutosave = true;
-    m_autosaveThread.join();
+    if ( m_autosaveThread.joinable() )
+    {
+        m_autosaveThread.join();
+    }
+    else
+    {
+        Serialize( m_dbName );
+    }
 }
 
 
@@ -33,6 +47,7 @@ void Database::Load( const std::string& dbName )
     if ( !s.OpenForRead( storyDBName ) )
     {
         LOG_WARN( "No database with name %s found. Continuing with new database...", dbName.c_str() );
+        m_autosaveThread = std::thread( &Database::Autosave, this );
         return;
     }
 
@@ -166,6 +181,7 @@ StoryIndex Database::AddOrUpdateStory( const ParsedStory& pStory, bool& shouldSe
     bool dirty = false;
     if ( it != storyHashToIndexMap.end() )
     {
+        DLOG( "DB: Updating story %s", pStory.title.c_str() );
         Story& story = stories[it->second];
         Story newStory = StoryFromParsedData( pStory );
 
@@ -192,7 +208,7 @@ StoryIndex Database::AddOrUpdateStory( const ParsedStory& pStory, bool& shouldSe
             else story.RemoveFlag( StoryFlags::IS_COMPLETE );
         }
         else
-        { 
+        {
             dirty = false;
             if ( !pStory.chap1Beginning.empty() )
             {
@@ -232,7 +248,8 @@ StoryIndex Database::AddOrUpdateStory( const ParsedStory& pStory, bool& shouldSe
     }
     else
     {
-        needsChap1 = shouldServerKeepUpdating = true;
+        DLOG( "DB: Adding new story %s", pStory.title.c_str() );
+        dirty = needsChap1 = shouldServerKeepUpdating = true;
         Story newStory = StoryFromParsedData( pStory );
         stories.push_back( newStory );
         storyIndex = static_cast<StoryIndex>( stories.size() - 1 );
@@ -251,11 +268,14 @@ FandomIndex Database::AddOrGetFandom( const Fandom& fandom )
     if ( it == fandomToIndexMap.end() )
     {
         ret = static_cast<FandomIndex>( fandoms.size() );
+        DLOG( "DB: Adding new fandom %s to slow %u", fandom.c_str(), ret );
         fandoms.push_back( fandom );
         fandomToIndexMap[fandom] = ret;
+        m_fandomsDirty = true;
     }
     else
     {
+        DLOG( "DB: Found fandom %s in slot %u", fandom.c_str(), it->second );
         ret = it->second;
     }
 
@@ -272,6 +292,7 @@ FreeformTagIndex Database::AddOrGetFreeformTag( const FreeformTag& tag )
         ret = static_cast<FreeformTagIndex>( freeformTags.size() );
         freeformTags.push_back( tag );
         freeformTagToIndexMap[tag] = ret;
+        m_tagsDirty = true;
     }
     else
     {
@@ -289,12 +310,15 @@ CharacterIndex Database::AddOrGetCharacter( const Character& character )
     if ( it == characterToIndexMap.end() )
     {
         ret = static_cast<CharacterIndex>( characters.size() );
+        DLOG( "DB: Adding new character %s (%u) (%u) to slot %u", character.name.c_str(), character.fandomIndex, character.gender, ret );
         characters.push_back( character );
         characterToIndexMap[character] = ret;
         characterNameToIndicesMap.insert( { character.name, ret } );
+        m_charactersDirty = true;
     }
     else
     {
+        DLOG( "DB: Found character %s (%u) (%u) in slot %u", character.name.c_str(), character.fandomIndex, character.gender, it->second );
         ret = it->second;
     }
 
@@ -311,9 +335,13 @@ CharacterInstance Database::GetCharacterFromParsedData( const ParsedCharacter& c
 
     if ( pStory.storySource == StorySource::FF )
     {
-        if ( characterMatchCount == 1 )
+        if ( pStory.fandoms.size() == 1 )
         {
-            fandomIndex = charactersWithThisName.first->second;
+            fandomIndex = fandoms[0];
+        }
+        else if ( characterMatchCount == 1 )
+        {
+            fandomIndex = characters[charactersWithThisName.first->second].fandomIndex;
         }
         else if ( characterMatchCount > 1 )
         {
@@ -379,6 +407,7 @@ Story Database::StoryFromParsedData( const ParsedStory& pStory )
     dataLen += 1 + sizeof( Relationship ) * pStory.relationships.size();
     newStory.freeFormTagsOffset = static_cast<uint16_t>( dataLen );
     dataLen += 1 + sizeof( FreeformTagIndex ) * pStory.freeformTags.size();
+    PG_ASSERT( dataLen <= UINT16_MAX );
 
     newStory.data = std::make_shared<uint8_t[]>( dataLen );
     char* data = (char*)newStory.data.get();
@@ -391,8 +420,6 @@ Story Database::StoryFromParsedData( const ParsedStory& pStory )
     data += pStory.authorLink.length() + 1;
     strcpy( data, pStory.description.c_str() );
     data += pStory.description.length() + 1;
-    strcpy( data, pStory.authorLink.c_str() );
-    data += pStory.authorLink.length() + 1;
 
     uint8_t numFandoms = static_cast<uint8_t>( pStory.fandoms.size() );
     reinterpret_cast<uint8_t*>( data )[0] = numFandoms;

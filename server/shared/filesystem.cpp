@@ -1,6 +1,7 @@
 #include "filesystem.hpp"
 #include "logger.hpp"
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 
 namespace fs = std::filesystem;
@@ -23,6 +24,13 @@ std::string BackToForwardSlashes( std::string str )
 void CreateDirectory( const std::string& dir )
 {
     fs::create_directories( dir );
+}
+
+
+void CreateEmptyFile( const std::string& path )
+{
+    std::ofstream out( path );
+    out.close();
 }
 
 

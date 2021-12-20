@@ -12,6 +12,8 @@ void CreateDirectory( const std::string& dir );
 // returns false if there was an error. If overwriteExisting is false, and 'to' exists, returns true
 bool CopyFile( const std::string& from, const std::string& to, bool overwriteExisting );
 
+void CreateEmptyFile( const std::string& path );
+
 // deletes single file or empty folder
 void DeleteFile( const std::string& filename );
 

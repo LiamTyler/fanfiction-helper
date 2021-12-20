@@ -65,17 +65,32 @@ def GetStoryFirst1KWords( story ):
         text = text[:2000]
     story.chap1Beginning = text.lower()
 
-def ParseFFSearchPage( text ):
+def ParseFFSearchPage( url, text ):
     lines = text.split( '\n' )
 
+    fandom = ""
+    # get fandom, ex: "Harry-Potter" in www.fanfiction.net/book/Harry-Potter/?whatever
+    p = url.find( "www.fanfiction.net/" ) + len( "www.fanfiction.net/" )
+    if "-Crossovers/" in url:
+        start = p
+        end = url.find( '/', start )
+        fandom = url[start:end]
+        p = fandom.find("-Crossovers")
+        fandom = fandom[:p]
+    else:
+        start = url.find( '/', p ) + 1
+        end = url.find( '/', start )
+        fandom = url[start:end]
+
+
     #global story_links, story_descs
-    story_links = [ x for x in lines if "class=\"z-list" in x ]
-    story_descs = [ x for x in lines if "class=\"z-indent" in x ]
+    story_links = [ x.replace( "&amp;", "&" ) for x in lines if "class=\"z-list" in x ]
+    story_descs = [ x.replace( "&amp;", "&" ) for x in lines if "class=\"z-indent" in x ]
 
     stories = []
     for i in range( len( story_links ) ):
         s = Story()
-        s.ParseFF( story_links[i], story_descs[i] )
+        s.ParseFF( url, fandom, story_links[i], story_descs[i] )
         stories.append( s )
 
     return stories
@@ -86,23 +101,11 @@ def DownloadFFNetStories( baseUrl, maxPages=100000 ):
     HOST = '127.0.0.1'  # The server's hostname or IP address
     PORT = 27015        # The port used by the server
 
-    # community urls differ slightly from regular search urls
-    beginUrl = baseUrl
-    endUrl   = ""
-    if "www.fanfiction.net/community" in baseUrl:
-        i = len(baseUrl)
-        numForwardSlashes = 0
-        while numForwardSlashes != 6:
-            i -= 1
-            numForwardSlashes += baseUrl[i] == '/'
-        beginUrl = baseUrl[:i+1]
-        endUrl = baseUrl[baseUrl.find( '/', i+1 ):]
-    else:
-        beginUrl += "&p="
+    beginUrl = baseUrl + "&p="
 
     page = 1
     while page <= maxPages:
-        url = beginUrl + str( page ) + endUrl
+        url = beginUrl + str( page )
         print( "Parsing page:", page, "/", maxPages )
         responseUrl, responseText = GetHTMLPage( url )
 
@@ -111,12 +114,12 @@ def DownloadFFNetStories( baseUrl, maxPages=100000 ):
             print( "Page", page, "does not exist" )
             break
 
-        newStories = ParseFFSearchPage( responseText )
+        newStories = ParseFFSearchPage( baseUrl, responseText )
 
         for story in newStories:
-            data = story.GetNetworkRepr()
-            #data = str( len( data ) + 1 ).encode() + b'\0' + str( 1 ).encode() + b'\0' + data
-            data = str( 1 ).encode() + b'\0' + data
+            #print( "Sending Story:\n", story )
+            #print("\n")
+            data = EncodeNum( 1 ) + story.GetNetworkRepr()
             s = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
             if not s:
                 print( "Could not create socket" )

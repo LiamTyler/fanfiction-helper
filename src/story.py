@@ -1,19 +1,9 @@
 import time
 from enum import IntEnum
+from difflib import SequenceMatcher
 
-# M = Male, F = Female, U = Unknown/Unimportant
-# Sometimes authors change character genders, which would be reflecte in currentGender (if parsed correctly)
-class Character:
-    def __init__( self, name, originalGender='U', currentGender='U' ):
-        self.name           = name
-        self.originalGender = originalGender
-        self.currentGender  = currentGender
-
-    def __eq__( self, o ):
-        return self.name == o.name and self.originalGender == o.originalGender and self.currentGender == o.currentGender
-
-    def __repr__( self ):
-        return "(" + self.name + ", " + self.currentGender + ")"
+def similar( a,b ):
+    return SequenceMatcher( None, a, b ).ratio()
 
 def ParseStoryDescKeyNumVal( desc, key, startPos = 0, endMarker = ' ' ):
         start = desc.find( key, startPos )
@@ -40,6 +30,7 @@ def GetPrefixInCurrentSentence( string, pos, maxLen=25 ):
     return string[begin:pos]
 
 class StoryFlags( IntEnum ):
+    NONE = 0,
     IS_COMPLETE = 1,
     IS_ABANDONED = 2,
     IS_SLASH_AUTO = 3,
@@ -49,17 +40,32 @@ class StoryFlags( IntEnum ):
     NOT_INTERESTED = 7,
     INTERESTED = 8
 
+def EncodeStr( s ):
+    return s.encode() + b'\0'
+
+def EncodeNum( num ):
+    return str( num ).encode() + b'\0'
+
+def EncodeStrList( stringList ):
+    L = len( stringList )
+    d = EncodeNum( L )
+    for s in stringList:
+        d += EncodeStr( s )
+    return d
+
 class Story:
+
     def __init__( self ):
         self.title          = ""
-        self.rating         = "" # K, K+, T, or M
+        self.contentRating  = "" # K, K+, T, or M
         self.author         = ""
         self.author_link    = ""
         self.description    = ""
         self.story_id       = ""
         self.genres         = []
         self.characters     = []
-        self.pairings       = [] # indices into self.characters array
+        self.relationships  = []
+        self.fandoms        = []
         self.words          = 0
         self.numReviews     = 0
         self.numFavorites   = 0
@@ -70,6 +76,7 @@ class Story:
         self.flags          = 0
         self.myRating       = 0 # out of 10
         self.updateDates    = []
+        self.freeformTags   = []
         self.storySource    = "" # FF or AO3
 
     def HasFlag( self, flag ):
@@ -90,48 +97,91 @@ class Story:
         return link
 
     def GetNetworkRepr( self ):
-        d = self.title.encode() + b'\0' + self.author.encode() + b'\0'
+        d = EncodeStr( self.storySource ) + \
+            EncodeStr( self.title ) + \
+            EncodeStr( self.author ) + \
+            EncodeStr( self.author_link ) + \
+            EncodeStr( self.description ) + \
+            EncodeStrList( self.fandoms ) + \
+            EncodeStrList( self.characters )
+        # relationships
+        d += EncodeStrList( self.freeformTags )
+        d += EncodeStrList( [str(x) for x in self.updateDates ] )
+
+        d += EncodeStr( self.story_id )
+        d += EncodeNum( self.flags )
+        d += EncodeNum( self.words )
+        d += EncodeNum( self.numReviews )
+        d += EncodeNum( self.numFavorites )
+        d += EncodeNum( self.numFollows )
+        d += EncodeNum( self.numChapters )
+        d += EncodeStrList( self.genres )
+        d += EncodeStr( self.contentRating )
+        
         return d
 
-    def ParseFF( self, titleSection, descSection ):
-        self.storySource = "FF"
+    def ParseFF( self, url, inFandom, titleSection, descSection ):
+        self.storySource = ""
+        if "www.fanfiction.net/" in url:
+            self.storySource = "FF"
+        elif "archiveofourown.org/" in url:
+            self.storySource = "AO3"
+        
         div3 = descSection.find( "</div></div></div>" )
         descSection = descSection[:div3 + len( "</div></div></div>" )]
 
-        # story_link
         pos = titleSection.find( '"/s/' )
         start = pos + 1
         pos = titleSection.find( '"><img', start )
         story_link = titleSection[start : pos]
         self.story_id = story_link[3:story_link.find( '/', 3 )]
 
-        # title
         start = titleSection.find( '>', pos + 2 ) + 1
         pos = titleSection.find( '</a>', start )
         self.title = titleSection[start : pos]
 
-        # author_link
         pos = titleSection.find( 'by <a href="', pos )
         start = titleSection.find( '"', pos ) + 1
         pos = titleSection.find( '>', pos )
-        self.author_link = titleSection[start : pos]
+        self.author_link = titleSection[start : pos-1]
 
-        #author
         start = pos + 1
         pos = titleSection.find( '</a>', pos )
         self.author = titleSection[start : pos]
 
-        # description
         start = descSection.find( '>' ) + 1
         pos = descSection.find( '<div class', start )
         self.description = descSection[start : pos].lower()
 
-        # rating
+        if "-Crossovers/" in url:
+            start = descSection.find( "Crossover - ", pos ) + len( "Crossover - " )
+            end = descSection.find( " - Rated:", pos )
+            fandoms = descSection[start:end]
+            #fandoms = fandoms.replace( "&amp;", "&" )
+            fandomsList = fandoms.split( " & " )
+            if len( fandomsList ) < 2 or len( fandomsList ) > 4:
+                print( "Invalid number of fandoms in string '" + fandoms + "'" )
+            elif len( fandomsList ) == 2:
+                self.fandoms = fandomsList
+            else:
+                mostSimilarIndex = 0
+                mostSimilarValue = 0
+                for i in range( 0, len( fandomsList ) ):
+                    v = similar( inFandom, " & ".join( fandomsList[:i+1] ) )
+                    if v > mostSimilarValue:
+                        mostSimilarIndex = i
+                        mostSimilarValue = v
+                fandom1 = " & ".join( fandomsList[:mostSimilarIndex+1] )
+                fandom2 = " & ".join( fandomsList[mostSimilarIndex+1:] )
+                self.fandoms = [ fandom1, fandom2 ]
+                
+        else:
+            self.fandoms = [ inFandom ]
+
         start = descSection.find( "Rated: ", pos ) + len( "Rated: " )
         pos = descSection.find( ' ', start )
-        self.rating = descSection[start : pos]
+        self.contentRating = descSection[start : pos]
 
-        # language
         start = pos + 3
         pos = descSection.find( ' ', start )
         #self.language = descSection[start : pos]
@@ -194,31 +244,24 @@ class Story:
             if character[-1] == ']':
                 name = name[:-1]
                 currentPairing.append( len( self.characters ) )
-                self.pairings.append( currentPairing )
+                self.relationships.append( currentPairing )
                 currentPairing = []
                 inPairing = False
 
-            self.characters.append( Character( name ) )
+            self.characters.append( name )
             if inPairing:
                 currentPairing.append( len( self.characters )-1 )
 
-        # update genders for characters
-        for character in self.characters:
-            # check the description to see if any of the genders were swapped
-            desc = self.description
-            firstAndLast = character.name.split( ' ' )
-            lens = [ len(name) for name in firstAndLast ]
-            longestName = firstAndLast[lens.index(max(lens))].lower()
-            pos = desc.find( longestName )
-            while pos != -1:
-                prefix = GetPrefixInCurrentSentence( desc, pos, 8 )
-                if "fem" in prefix or "girl" in prefix:
-                    character.currentGender = 'F'
-                    break
-                if " male" in prefix or " boy" in prefix:
-                    character.currentGender = 'M'
-                    break
-                pos = desc.find( longestName, pos + 1 )
+        # expand out relationships: [ Harry/Hermione/Fleur ] -> [Harry/Hermione, Harry/Fleur, Hermione/Fleur]
+        rel = self.relationships
+        self.relationships = []
+        for r in rel:
+            for i in range(len(r)):
+                for j in range( i + 1, len(r)):
+                    self.relationships.append( [r[i], r[j]] )
+            
+        
+
 
     def __lt__( self, other ):
         return self.story_id < other.story_id
@@ -233,32 +276,28 @@ class Story:
         return hash( self.story_id )
 
     def __str__( self ):
-        s = "'" + self.title + "' by '" + self.author + "'"
-        
-        """
-        g = "[]"
-        if len( self.genres ) == 1:
-            g = self.genres[0]
-        if len( self.genres ) > 1:
-            g = " & "
-            g = g.join( self.genres )
-        "Title: " + self.title + '\n' + \
+        #s = "'" + self.title + "' by '" + self.author + "'"
+
+        s = "Title: " + self.title + '\n' + \
+            "Author: " + self.author + " -> " + self.author_link + '\n' + \
+            "Description: " + self.description + '\n' + \
+            "Fandoms: " + str( self.fandoms ) + '\n' + \
+            "Characters: " + str( self.characters ) + '\n' + \
+            "Relationships: " + str( self.relationships ) + '\n' + \
+            "Freeform Tags: " + str( self.freeformTags ) + '\n' + \
+            "Update Infos: " + str( self.updateDates ) + '\n' + \
+            "Flags: " + str( self.flags ) + '\n' + \
+            "StoryID: " + str( self.story_id ) + '\n' + \
             "Num Words: " + str( self.words ) + '\n' + \
-            "Num Chapters: " + str( self.numChapters ) + '\n' + \
             "Num Reviews: " + str( self.numReviews ) + '\n' + \
             "Num Favorites: " + str( self.numFavorites ) + '\n' + \
             "Num Follows: " + str( self.numFollows ) + '\n' + \
-            "Rating: " + self.rating + '\n' + \
-            "Genres: " + g + '\n' + \
-            "Characters: " + str( self.characters ) + '\n' + \
-            "Pairings: " + str( self.pairings ) + '\n' + \
-            "Author: " + self.author + " -> " + self.author_link + '\n' + \
-            "Language: " + self.language + '\n' + \
-            "Story Link: " + self.story_link + '\n' + \
-            "Update Date: " + time.strftime( '%m/%d/%Y', time.localtime( self.updateDate ) ) + '\n' + \
-            "Publish Date: " + time.strftime( '%m/%d/%Y', time.localtime( self.publishDate ) ) + '\n' + \
-            "Description: " + self.description
-        """
+            "Num Chapters: " + str( self.numChapters ) + '\n' + \
+            "Genres: " + str( self.genres ) + '\n' + \
+            "StorySource: " + self.storySource + '\n' + \
+            "ContentRating: " + self.contentRating + '\n'
+
+        #"Update Date: " + time.strftime( '%m/%d/%Y', time.localtime( self.updateDate ) ) + '\n'
         return s
 
     def __repr__( self ):        

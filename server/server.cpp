@@ -21,6 +21,7 @@ static uint32_t s_numClients;
 static SOCKET s_listenSocket;
 static std::thread s_serverThread;
 static bool s_initialized;
+static server::ClientHandlerFunc s_clientHandler;
 
 #define PORT "27015"
 
@@ -29,8 +30,9 @@ static void ListenForCommands();
 namespace server
 {
 
-bool Init()
+bool Init( ClientHandlerFunc clientHandler )
 {
+    s_clientHandler = clientHandler;
     s_initialized = false;
     s_serverShouldStop = false;
 
@@ -134,14 +136,6 @@ void Shutdown()
 
 } // namespace server
 
-enum ServerCmds : uint32_t
-{
-    INVALID_OR_MISSING  = 0,
-    UPDATE_OR_ADD_STORY = 1,
-
-    COUNT
-};
-
 static bool AddOrUpdateStory( char* data )
 {
     ParsedStory pStory;
@@ -150,6 +144,7 @@ static bool AddOrUpdateStory( char* data )
     pStory.author = std::string( data );
     data += pStory.title.length() + 1;
 }
+
 
 static void HandleClient( uint32_t clientIndex )
 {
@@ -168,47 +163,18 @@ static void HandleClient( uint32_t clientIndex )
                 continue;
             }
         }
-        if ( bytesReceived > 0 )
-        {
-            char* data = recvBuffer;
-            uint32_t cmd = strtoul( recvBuffer, &data, 0 );
-            if ( cmd == INVALID_OR_MISSING )
-            {
-                LOG_ERR( "Command from client could not be processed, or was missing" );
-                break;
-            }
-            ++data;
-            //LOG( "Server recieved msg of cmd %u: '%s'", cmd, data );
-            if ( cmd == UPDATE_OR_ADD_STORY )
-            {
-
-            }
-            else
-            {
-                LOG_ERR( "Unknown client cmd %u", cmd );
-            }
-
-            //std::string sendMsg = "message recieved";
-            //int iSendResult = send( s_clientSocket, sendMsg.c_str(), (int)sendMsg.length() + 1, 0 );
-            //if ( iSendResult == SOCKET_ERROR )
-            //{
-            //    LOG_ERR( "send failed with error: %d", WSAGetLastError() );
-            //    clientConnected = false;
-            //}
-        }
         else if ( bytesReceived == 0 )
         {
-            LOG( "Client closed connection" );
+            //LOG( "Client closed connection" );
             clientConnected = false;
         }
-        else if ( bytesReceived == -1 )
+        else if ( bytesReceived > 0 )
         {
-            int err = WSAGetLastError();
-            if ( err != WSAEINTR )
-            {
-                LOG_ERR( "HandleClient: recv failed with error: %d", WSAGetLastError() );
-            }
-            clientConnected = false;
+            s_clientHandler( recvBuffer, bytesReceived );
+        }
+        else
+        {
+            LOG_ERR( "Recv return %d bytes received?", bytesReceived );
         }
     }
     closesocket( clientSocket );

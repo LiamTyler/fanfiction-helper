@@ -1,9 +1,12 @@
 #pragma once
 
+#include <functional>
+
 namespace server
 {
 
-bool Init();
+using ClientHandlerFunc = std::function<void( char*, int )>;
+bool Init( ClientHandlerFunc clientHandler );
 void Shutdown();
 
 } // namespace server

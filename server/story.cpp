@@ -1,5 +1,43 @@
 #include "story.hpp"
 #include "shared/serializer.hpp"
+#include <unordered_map>
+
+
+Genre GenreFromString( const std::string& str )
+{
+    std::unordered_map<std::string, Genre> map =
+    {
+        { "Adventure", Genre::ADVENTURE },
+        { "Angst", Genre::ANGST },
+        { "Crime", Genre::CRIME },
+        { "Drama", Genre::DRAMA },
+        { "Family", Genre::FAMILY },
+        { "Fantasy", Genre::FANTASY },
+        { "Frienship", Genre::FRIENDSHIP },
+        { "General", Genre::GENERAL },
+        { "Horror", Genre::HORROR },
+        { "Humor", Genre::HUMOR },
+        { "Hurt/Comfort", Genre::HURT_COMFORT },
+        { "Mystery", Genre::MYSTERY },
+        { "Parody", Genre::PARODY },
+        { "Poetry", Genre::POETRY },
+        { "Romance", Genre::ROMANCE },
+        { "Sci-Fi", Genre::SCIFI },
+        { "Spiritual", Genre::SPIRITUAL },
+        { "Supernatural", Genre::SUPERNATURAL },
+        { "Suspense", Genre::SUSPENSE },
+        { "Tragedy", Genre::TRAGEDY },
+        { "Western", Genre::WESTERN },
+    };
+    if ( map.find( str ) != map.end() )
+    {
+        return map[str];
+    }
+    else
+    {
+        return Genre::NONE;
+    }
+}
 
 
 void Story::Serialize( Serializer* s ) const
