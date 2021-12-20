@@ -45,7 +45,7 @@ void Story::Serialize( Serializer* s ) const
     uint16_t* udata16 = reinterpret_cast<uint16_t*>( data.get() );
     uint32_t dataLen = fandomsOffset;
     dataLen += 1 + sizeof( FandomIndex ) * data[fandomsOffset];
-    dataLen += 2 + sizeof( UpdateInfo ) * udata16[updatesOffset];
+    dataLen += 2 + sizeof( UpdateInfo ) * reinterpret_cast<uint16_t*>( data.get() + updatesOffset )[0];
     dataLen += 1 + sizeof( CharacterInstance ) * data[charactersOffset];
     dataLen += 1 + sizeof( Relationship ) * data[relationshipsOffset];
     dataLen += 1 + sizeof( FreeformTagIndex ) * data[freeFormTagsOffset];
@@ -216,4 +216,11 @@ void Story::Genres( std::vector<Genre>& outGenres ) const
     {
         outGenres.push_back( genres[i] );
     }
+}
+
+
+size_t StoryHash( StorySource source, uint32_t storyID )
+{
+    size_t hash = (static_cast<size_t>( source ) << 32) + storyID;
+    return hash;
 }

@@ -206,6 +206,8 @@ private:
 };
 using StoryIndex = uint32_t;
 
+size_t StoryHash( StorySource source, uint32_t storyID );
+
 
 struct ParsedCharacter
 {

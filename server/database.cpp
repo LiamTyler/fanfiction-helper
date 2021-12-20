@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <functional>
 
-#define DEBUG_DATABASE IN_USE
+#define DEBUG_DATABASE NOT_IN_USE
 #if USING( DEBUG_DATABASE )
 #define DLOG( ... ) LOG( __VA_ARGS__ )
 #else
@@ -57,6 +57,8 @@ void Database::Load( const std::string& dbName )
     for ( uint32_t i = 0; i < numStories; ++i )
     {
         stories[i].Deserialize( &s );
+        size_t hash = StoryHash( stories[i].storySource, stories[i].storyID );
+        storyHashToIndexMap[hash] = i;
     }
 
     {
@@ -173,12 +175,15 @@ static bool FandomListFind( uint8_t numFandoms, FandomIndex* fandoms, FandomInde
 }
 
 
-StoryIndex Database::AddOrUpdateStory( const ParsedStory& pStory, bool& shouldServerKeepUpdating, bool& needsChap1 )
+StoryIndex Database::AddOrUpdateStory( const ParsedStory& pStory, bool* outShouldServerKeepUpdating, bool* outNeedsChap1 )
 {
-    StoryIndex storyIndex = 0;
-    size_t hash = (static_cast<size_t>( pStory.storySource ) << 32) + pStory.storyID;
-    auto it = storyHashToIndexMap.find( hash );
+    bool shouldServerKeepUpdating = false;
+    bool needsChap1 = false;
     bool dirty = false;
+
+    StoryIndex storyIndex = 0;
+    size_t hash = StoryHash( pStory.storySource, pStory.storyID );
+    auto it = storyHashToIndexMap.find( hash );
     if ( it != storyHashToIndexMap.end() )
     {
         DLOG( "DB: Updating story %s", pStory.title.c_str() );
@@ -249,13 +254,16 @@ StoryIndex Database::AddOrUpdateStory( const ParsedStory& pStory, bool& shouldSe
     else
     {
         DLOG( "DB: Adding new story %s", pStory.title.c_str() );
-        dirty = needsChap1 = shouldServerKeepUpdating = true;
+        shouldServerKeepUpdating = dirty = needsChap1 =  true;
         Story newStory = StoryFromParsedData( pStory );
         stories.push_back( newStory );
         storyIndex = static_cast<StoryIndex>( stories.size() - 1 );
+        storyHashToIndexMap[hash] = storyIndex;
     }
     
     m_storiesDirty = m_storiesDirty || dirty;
+    if ( outShouldServerKeepUpdating ) *outShouldServerKeepUpdating = shouldServerKeepUpdating;
+    if ( outNeedsChap1 ) *outNeedsChap1 = needsChap1;
 
     return storyIndex;
 }
@@ -420,6 +428,7 @@ Story Database::StoryFromParsedData( const ParsedStory& pStory )
     data += pStory.authorLink.length() + 1;
     strcpy( data, pStory.description.c_str() );
     data += pStory.description.length() + 1;
+    PG_ASSERT( data - (char*)newStory.data.get() == newStory.fandomsOffset );
 
     uint8_t numFandoms = static_cast<uint8_t>( pStory.fandoms.size() );
     reinterpret_cast<uint8_t*>( data )[0] = numFandoms;
@@ -431,6 +440,7 @@ Story Database::StoryFromParsedData( const ParsedStory& pStory )
         data += sizeof( FandomIndex );
     }
 
+    PG_ASSERT( data - (char*)newStory.data.get() == newStory.updatesOffset );
     reinterpret_cast<uint16_t*>( data )[0] = static_cast<uint16_t>( pStory.updateInfos.size() );
     data += sizeof( uint16_t );
     auto updateDates = pStory.updateInfos;
@@ -441,6 +451,7 @@ Story Database::StoryFromParsedData( const ParsedStory& pStory )
         data += sizeof( UpdateInfo );
     }
 
+    PG_ASSERT( data - (char*)newStory.data.get() == newStory.charactersOffset );
     reinterpret_cast<uint8_t*>( data )[0] = static_cast<uint8_t>( pStory.characters.size() );
     data += sizeof( uint8_t );
     for ( const auto& c : pStory.characters )
@@ -449,6 +460,7 @@ Story Database::StoryFromParsedData( const ParsedStory& pStory )
         data += sizeof( CharacterInstance );
     }
 
+    PG_ASSERT( data - (char*)newStory.data.get() == newStory.relationshipsOffset );
     reinterpret_cast<uint8_t*>( data )[0] = static_cast<uint8_t>( pStory.relationships.size() );
     data += sizeof( uint8_t );
     for ( const auto& r : pStory.relationships )
@@ -461,6 +473,7 @@ Story Database::StoryFromParsedData( const ParsedStory& pStory )
         data += sizeof( Relationship );
     }
 
+    PG_ASSERT( data - (char*)newStory.data.get() == newStory.freeFormTagsOffset );
     reinterpret_cast<uint8_t*>( data )[0] = static_cast<uint8_t>( pStory.freeformTags.size() );
     data += sizeof( uint8_t );
     for ( const auto& tag : pStory.freeformTags )
@@ -496,15 +509,16 @@ Story Database::StoryFromParsedData( const ParsedStory& pStory )
 
 void Database::Autosave()
 {
+    float secondsElapsed;
     while ( !m_stopAutosave )
     {
-        float secondsElapsed = 0;
+        secondsElapsed = 0;
         auto begin = std::chrono::steady_clock::now();
         while ( !m_stopAutosave && secondsElapsed < 60 )
         {
             auto end = std::chrono::steady_clock::now();
             std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
-            secondsElapsed += std::chrono::duration_cast<std::chrono::seconds>( end - begin ).count();
+            secondsElapsed = (float)std::chrono::duration_cast<std::chrono::seconds>( end - begin ).count();
         }
         Serialize( m_dbName );
     }

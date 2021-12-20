@@ -124,9 +124,9 @@ void HandlePythonScraper( char* data, int bytesReceived )
             pStory.updateInfos.push_back( UpdateInfo{ (time_t)std::stoull( updates[1] ), pStory.wordCount } );
         }
 
-        LOG( "Adding story %s by %s", pStory.title.c_str(), pStory.author.c_str() );
         bool updated, needsChap1;
-        G_GetDatabase()->AddOrUpdateStory( pStory, updated, needsChap1 );
+        G_GetDatabase()->AddOrUpdateStory( pStory, &updated, &needsChap1 );
+        LOG( "Story %s updated: %u, needs chap1: %u", pStory.title.c_str(), updated, needsChap1 );
     }
     else
     {
@@ -148,7 +148,7 @@ int main()
     Logger_AddLogLocation( "stdout", stdout );
     Logger_AddLogLocation( "log_serverCPP", "log_serverCPP.txt" );
 
-    G_GetDatabase()->Load( "database" );
+    G_GetDatabase()->Load( "../database/database" );
     server::Init( HandlePythonScraper );
     StartPythonScraper();
 

@@ -15,7 +15,7 @@ public:
     void Load( const std::string& dbName );
     void Serialize( const std::string& dbName );
 
-    StoryIndex AddOrUpdateStory( const ParsedStory& pStory, bool& updated, bool& needsChap1 );
+    StoryIndex AddOrUpdateStory( const ParsedStory& pStory, bool* updated = nullptr, bool* needsChap1 = nullptr );
 
     const Fandom& GetFandom( FandomIndex index ) const                 { return fandoms[index]; }
     const FreeformTag& GetFreeformTag( FreeformTagIndex index ) const  { return freeformTags[index]; }
