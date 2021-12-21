@@ -197,7 +197,8 @@ StoryIndex Database::AddOrUpdateStory( const ParsedStory& pStory, bool* outShoul
             shouldServerKeepUpdating = dirty = true;
             ParsedStory combinedData = pStory;
             UpdateInfo* updates = reinterpret_cast<UpdateInfo*>( story.data.get() + story.updatesOffset + 2 );
-            for ( uint16_t i = 0; i < story.UpdateCount(); ++i )
+            uint16_t updateCount = story.UpdateCount();
+            for ( uint16_t i = 0; i < updateCount; ++i )
             {
                 combinedData.updateInfos.push_back( updates[i] );
             }

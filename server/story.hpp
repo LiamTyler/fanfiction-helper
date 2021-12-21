@@ -52,6 +52,7 @@ enum class Genre : uint8_t
 };
 
 Genre GenreFromString( const std::string& str );
+std::string GenreToString( Genre genre );
 
 enum class Gender : uint8_t
 {
@@ -148,11 +149,11 @@ public:
     const char* AuthorLink() const;
     std::string AuthorLinkFull() const;
     std::string StoryLink() const;
-    void Fandoms( std::vector<FandomIndex>& fandomIndices ) const;
+    std::vector<FandomIndex> Fandoms() const;
+    std::vector<CharacterInstance> Characters() const;
+    std::vector<Relationship> Relationships() const;
+    std::vector<FreeformTagIndex> FreeformTags() const;
     time_t GetLastUpdate() const;
-    void Characters( std::vector<CharacterInstance>& characters ) const;
-    void Relationships( std::vector<Relationship>& relationships ) const;
-    void FreeformTags( std::vector<FreeformTagIndex>& freeformTagIndices ) const;
     uint8_t FandomCount() const;
     uint16_t UpdateCount() const;
     uint8_t CharacterCount() const;
@@ -170,7 +171,8 @@ public:
     uint32_t ChapterCount() const { return chapterCount; }
     time_t PublishDate() const { return publishDate; }
 
-    void Genres( std::vector<Genre>& genres ) const;
+    std::vector<Genre> Genres() const;
+    bool HasGenre( Genre genre ) const;
     StorySource GetStorySource() const { return storySource; }
     ContentRating GetContentRating() const { return contentRating; }
     uint8_t MyQualityRating() const { return myQualityRating; }

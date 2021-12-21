@@ -21,6 +21,7 @@ public:
     const FreeformTag& GetFreeformTag( FreeformTagIndex index ) const  { return freeformTags[index]; }
     const Character& GetCharacter( CharacterIndex index ) const        { return characters[index]; }
     const Story& GetStory( StoryIndex index ) const                    { return stories[index]; }
+    uint32_t NumStories() const                                        { return static_cast<uint32_t>( stories.size() ); }
     void StopAutosave() { m_stopAutosave = true; }
 
 private:

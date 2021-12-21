@@ -40,6 +40,38 @@ Genre GenreFromString( const std::string& str )
 }
 
 
+std::string GenreToString( Genre genre )
+{
+    std::string strs[] =
+    {
+         "None",         // NONE
+         "Adventure",    // ADVENTURE
+         "Angst",        // ANGST
+         "Crime",        // CRIME
+         "Drama",        // DRAMA
+         "Family",       // FAMILY
+         "Fantasy",      // FANTASY
+         "Friendship",   // FRIENDSHIP
+         "General",      // GENERAL
+         "Horror",       // HORROR
+         "Humor",        // HUMOR
+         "Hurt/Comfort", // HURT_COMFORT
+         "Mystery",      // MYSTERY
+         "Parody",       // PARODY
+         "Poetry",       // POETRY
+         "Romance",      // ROMANCE
+         "Sci-Fi",       // SCIFI
+         "Spiritual",    // SPIRITUAL
+         "Supernatural", // SUPERNATURAL
+         "Suspense",     // SUSPENSE
+         "Tragedy",      // TRAGEDY
+         "Western",      // WESTERN
+    };
+
+    return strs[static_cast<uint8_t>( genre )];
+}
+
+
 void Story::Serialize( Serializer* s ) const
 {
     uint16_t* udata16 = reinterpret_cast<uint16_t*>( data.get() );
@@ -148,15 +180,56 @@ std::string Story::StoryLink() const
 }
 
 
-void Story::Fandoms( std::vector<FandomIndex>& fandomIndices ) const
+std::vector<FandomIndex> Story::Fandoms() const
 {
     uint8_t count = data[fandomsOffset];
-    fandomIndices.resize( count );
+    std::vector<FandomIndex> fandomIndices( count );
     FandomIndex* fandoms = reinterpret_cast<FandomIndex*>( data.get() + fandomsOffset + 1 );
     for ( uint8_t i = 0; i < count; ++i )
     {
         fandomIndices[i] = fandoms[i];
     }
+    return fandomIndices;
+}
+
+
+std::vector<CharacterInstance> Story::Characters() const
+{
+    uint8_t count = data[charactersOffset];
+    std::vector<CharacterInstance> characterIndices( count );
+    CharacterInstance* characters = reinterpret_cast<CharacterInstance*>( data.get() + charactersOffset + 1 );
+    for ( uint8_t i = 0; i < count; ++i )
+    {
+        characterIndices[i] = characters[i];
+    }
+    return characterIndices;
+}
+
+
+std::vector<Relationship> Story::Relationships() const
+{
+    uint8_t count = data[relationshipsOffset];
+    std::vector<Relationship> relationships( count );
+    Relationship* rel = reinterpret_cast<Relationship*>( data.get() + relationshipsOffset + 1 );
+    for ( uint8_t i = 0; i < count; ++i )
+    {
+        relationships[i] = rel[i];
+    }
+    return relationships;
+}
+
+
+std::vector<FreeformTagIndex> Story::FreeformTags() const
+{
+    uint8_t count = data[freeFormTagsOffset];
+    std::vector<FreeformTagIndex> outTags( count );
+    FreeformTagIndex* tags = reinterpret_cast<FreeformTagIndex*>( data.get() + freeFormTagsOffset + 1 );
+
+    for ( uint8_t i = 0; i < count; ++i )
+    {
+        outTags[i] = tags[i];
+    }
+    return outTags;
 }
 
 
@@ -166,56 +239,32 @@ time_t Story::GetLastUpdate() const
 }
 
 
-void Story::Characters( std::vector<CharacterInstance>& characterIndices ) const
-{
-    uint8_t count = data[charactersOffset];
-    characterIndices.resize( count );
-    CharacterInstance* characters = reinterpret_cast<CharacterInstance*>( data.get() + charactersOffset + 1 );
-    for ( uint8_t i = 0; i < count; ++i )
-    {
-        characterIndices[i] = characters[i];
-    }
-}
-
-
-void Story::Relationships( std::vector<Relationship>& relationships ) const
-{
-    uint8_t count = data[relationshipsOffset];
-    relationships.resize( count );
-    Relationship* rel = reinterpret_cast<Relationship*>( data.get() + relationshipsOffset + 1 );
-    for ( uint8_t i = 0; i < count; ++i )
-    {
-        relationships[i] = rel[i];
-    }
-}
-
-
-void Story::FreeformTags( std::vector<FreeformTagIndex>& freeformTagIndices ) const
-{
-    uint8_t count = data[freeFormTagsOffset];
-    freeformTagIndices.resize( count );
-    FreeformTagIndex* tags = reinterpret_cast<FreeformTagIndex*>( data.get() + freeFormTagsOffset + 1 );
-    for ( uint8_t i = 0; i < count; ++i )
-    {
-        freeformTagIndices[i] = tags[i];
-    }
-}
-
-
 uint8_t Story::FandomCount() const { return data[fandomsOffset]; }
-uint16_t Story::UpdateCount() const { return ((uint16_t*)data.get())[updatesOffset]; }
+uint16_t Story::UpdateCount() const { return *(uint16_t*)(data.get() + updatesOffset); }
 uint8_t Story::CharacterCount() const { return data[charactersOffset]; }
 uint8_t Story::RelationshipCount() const { return data[relationshipsOffset]; }
 uint8_t Story::FreeformTagCount() const { return data[freeFormTagsOffset]; }
 
 
-void Story::Genres( std::vector<Genre>& outGenres ) const
+std::vector<Genre> Story::Genres() const
 {
-    outGenres.clear();
+    std::vector<Genre> outGenres;
     for ( int i = 0; i < ARRAY_COUNT( genres ); ++i )
     {
-        outGenres.push_back( genres[i] );
+        if ( genres[i] != Genre::NONE )
+        {
+            outGenres.push_back( genres[i] );
+        }
     }
+    return outGenres;
+}
+
+
+bool Story::HasGenre( Genre genre ) const
+{
+    if ( genres[0] != Genre::NONE && genres[0] == genre ) return true;
+    if ( genres[1] != Genre::NONE && genres[1] == genre ) return true;
+    return false;
 }
 
 
