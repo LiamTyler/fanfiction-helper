@@ -467,7 +467,7 @@ Story Database::StoryFromParsedData( const ParsedStory& pStory )
     {
         Relationship rel;
         rel.character1 = GetCharacterFromParsedData( r.character1, fandoms, pStory );
-        rel.character2 = GetCharacterFromParsedData( r.character1, fandoms, pStory );
+        rel.character2 = GetCharacterFromParsedData( r.character2, fandoms, pStory );
         rel.type = r.type;
         reinterpret_cast<Relationship*>( data )[0] = rel;
         data += sizeof( Relationship );

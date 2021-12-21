@@ -5,6 +5,15 @@ from difflib import SequenceMatcher
 def similar( a,b ):
     return SequenceMatcher( None, a, b ).ratio()
 
+class RelationshipType( IntEnum ):
+    ROMANTIC = 0,
+    PLATONIC = 1
+
+class Relationship:
+    def __init__( self, characters, type ):
+        self.characters = characters
+        self.type = type
+
 def ParseStoryDescKeyNumVal( desc, key, startPos = 0, endMarker = ' ' ):
         start = desc.find( key, startPos )
         if start == -1:
@@ -104,7 +113,11 @@ class Story:
             EncodeStr( self.description ) + \
             EncodeStrList( self.fandoms ) + \
             EncodeStrList( self.characters )
-        # relationships
+        d += EncodeNum( len( self.relationships ) )
+        for r in self.relationships:
+            d += EncodeStr( r.characters[0] )
+            d += EncodeStr( r.characters[1] )
+            d += EncodeNum( int( r.type ) )
         d += EncodeStrList( self.freeformTags )
         d += EncodeStrList( [str(x) for x in self.updateDates ] )
 
@@ -258,22 +271,7 @@ class Story:
         for r in rel:
             for i in range(len(r)):
                 for j in range( i + 1, len(r)):
-                    self.relationships.append( [r[i], r[j]] )
-            
-        
-
-
-    def __lt__( self, other ):
-        return self.story_id < other.story_id
-
-    def __eq__( self, other ):
-        return self.story_id == other.story_id
-
-    def __ne__( self, other ):
-        return not( self.__eq__( self, other ) )
-
-    def __hash__( self ):
-        return hash( self.story_id )
+                    self.relationships.append( Relationship( [ self.characters[r[i]], self.characters[r[j]] ], RelationshipType.ROMANTIC ) )
 
     def __str__( self ):
         #s = "'" + self.title + "' by '" + self.author + "'"

@@ -1,4 +1,10 @@
+Jayce,U,0
+Viktor,U,0
+Jinx,U,0
 Lux,U,0
+Soraka,U,0
+Ahri,U,0
+OC,U,0
 Talon,U,0
 Katarina,U,0
 Darius,U,0
@@ -6,13 +12,8 @@ Caitlyn,U,0
 Vi,U,0
 Jax,U,0
 Sivir,U,0
-Jayce,U,0
-OC,U,0
-Jinx,U,0
 Ezreal,U,0
-Ahri,U,0
 Yasuo,U,0
-Viktor,U,0
 Kai'Sa,U,0
 Zoe,U,0
 LeBlanc,U,0
@@ -72,7 +73,6 @@ Elise,U,0
 Volibear,U,0
 Kayle,U,0
 Morgana,U,0
-Soraka,U,0
 Zyra,U,0
 Kalista,U,0
 Kassadin,U,0

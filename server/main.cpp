@@ -95,7 +95,17 @@ void HandlePythonScraper( char* data, int bytesReceived )
             c.genderModifier = Gender::UNKNOWN;
             pStory.characters.emplace_back( c );
         }
-        // TODO: Relationships
+
+        uint32_t numRelationships = ParseUNum<uint32_t>( data );
+        for ( uint32_t i = 0; i < numRelationships; ++i )
+        {
+            ParsedRelationship r;
+            r.character1.name = ParseString( data );
+            r.character1.genderModifier = Gender::UNKNOWN;
+            r.character2.name = ParseString( data );
+            r.character2.genderModifier = Gender::UNKNOWN;
+            r.type = ParseUNum<uint32_t>( data ) == 0 ? Relationship::Type::Romantic : Relationship::Type::Platonic;
+        }
 
         pStory.freeformTags = ParseStringVector( data );
         auto updates = ParseStringVector( data );
