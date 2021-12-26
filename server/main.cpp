@@ -202,6 +202,7 @@ void HandleClientRequests( size_t inClientSocket, char* data, int bytesReceived 
     {
         LOG_ERR( "Unknown client cmd %u", cmd );
     }
+    //LOG( "Done with Client" );
 }
 
 

@@ -15,8 +15,14 @@
 
 static bool s_serverShouldStop;
 constexpr uint32_t MAX_CLIENTS = 40;
-static SOCKET s_clientSockets[MAX_CLIENTS];
-static std::thread s_clientThreads[MAX_CLIENTS];
+struct Client
+{
+    SOCKET socket;
+    std::thread thread;
+    bool isDone = false;
+};
+
+static Client s_clients[MAX_CLIENTS];
 static uint32_t s_numClients;
 static SOCKET s_listenSocket;
 static std::thread s_serverThread;
@@ -95,12 +101,30 @@ bool Init( ClientHandlerFunc clientHandler )
     }
     for ( uint32_t i = 0; i < MAX_CLIENTS; ++i )
     {
-        s_clientSockets[i] = INVALID_SOCKET;
+        s_clients[i].socket = INVALID_SOCKET;
+        s_clients[i].isDone = false;
     }
     s_initialized = true;
     s_serverThread = std::thread( ListenForCommands );
 
     return true;
+}
+
+void CloseClient( Client& client )
+{
+    if ( client.socket != INVALID_SOCKET )
+    {
+        int result = shutdown( client.socket, SD_SEND );
+        if ( result == SOCKET_ERROR )
+        {
+            LOG_ERR( "Failed to shutdown client socket with error: %d", WSAGetLastError() );
+        }
+        closesocket( client.socket );
+    }
+    if ( client.thread.joinable() )
+    {
+        client.thread.join();
+    }
 }
 
 
@@ -112,20 +136,7 @@ void Shutdown()
         
         for ( uint32_t i = 0; i < MAX_CLIENTS; ++i )
         {
-            auto socket = s_clientSockets[i];
-            if ( socket != INVALID_SOCKET )
-            {
-                int result = shutdown( socket, SD_SEND );
-                if ( result == SOCKET_ERROR )
-                {
-                    LOG_ERR( "Failed to shutdown client socket with error: %d", WSAGetLastError() );
-                }
-                closesocket( socket );
-            }
-            if ( s_clientThreads[i].joinable() )
-            {
-                s_clientThreads[i].join();
-            }
+            CloseClient( s_clients[i] );
         }
         closesocket( s_listenSocket );
         s_serverThread.join();
@@ -138,13 +149,13 @@ void Shutdown()
 
 static void HandleClient( uint32_t clientIndex )
 {
-    SOCKET clientSocket = s_clientSockets[clientIndex];
+    Client& client = s_clients[clientIndex];
     constexpr int recvBufferLen = 65536;
     char recvBuffer[recvBufferLen];
     bool clientConnected = true;
     while ( clientConnected && !s_serverShouldStop )
     {
-        int bytesReceived = recv( clientSocket, recvBuffer, recvBufferLen, 0 );
+        int bytesReceived = recv( client.socket, recvBuffer, recvBufferLen, 0 );
         if ( bytesReceived == -1 )
         {
             int err = WSAGetLastError();
@@ -160,15 +171,21 @@ static void HandleClient( uint32_t clientIndex )
         }
         else if ( bytesReceived > 0 )
         {
-            s_clientHandler( clientSocket, recvBuffer, bytesReceived );
+            s_clientHandler( client.socket, recvBuffer, bytesReceived );
         }
         else
         {
             LOG_ERR( "Recv return %d bytes received?", bytesReceived );
         }
     }
-    closesocket( clientSocket );
-    s_clientSockets[clientIndex] = INVALID_SOCKET;
+    int result = shutdown( client.socket, SD_SEND );
+    if ( result == SOCKET_ERROR )
+    {
+        LOG_ERR( "Failed to shutdown client socket with error: %d", WSAGetLastError() );
+    }
+    closesocket( client.socket );
+    client.socket = INVALID_SOCKET;
+    client.isDone = true;
 }
 
 static void ListenForCommands() 
@@ -190,16 +207,17 @@ static void ListenForCommands()
         uint32_t i = 0;
         for ( ; i < MAX_CLIENTS; ++i )
         {
-            if ( s_clientThreads[i].joinable() )
+            if ( s_clients[i].isDone )
             {
-                s_clientThreads[i].join();
+                server::CloseClient( s_clients[i] );
                 --s_numClients;
             }
-            if ( s_clientSockets[i] == INVALID_SOCKET )
+            if ( s_clients[i].socket == INVALID_SOCKET )
             {
                 ++s_numClients;
-                s_clientSockets[i] = clientSocket;
-                s_clientThreads[i] = std::thread( HandleClient, i );
+                s_clients[i].isDone = false;
+                s_clients[i].socket = clientSocket;
+                s_clients[i].thread = std::thread( HandleClient, i );
                 break;
             }
         }
