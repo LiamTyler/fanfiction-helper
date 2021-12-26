@@ -5,7 +5,7 @@
 namespace server
 {
 
-using ClientHandlerFunc = std::function<void( char*, int )>;
+using ClientHandlerFunc = std::function<void( size_t, char*, int )>;
 bool Init( ClientHandlerFunc clientHandler );
 void Shutdown();
 

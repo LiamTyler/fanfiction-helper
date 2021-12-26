@@ -136,16 +136,6 @@ void Shutdown()
 
 } // namespace server
 
-static bool AddOrUpdateStory( char* data )
-{
-    ParsedStory pStory;
-    pStory.title = std::string( data );
-    data += pStory.title.length() + 1;
-    pStory.author = std::string( data );
-    data += pStory.title.length() + 1;
-}
-
-
 static void HandleClient( uint32_t clientIndex )
 {
     SOCKET clientSocket = s_clientSockets[clientIndex];
@@ -170,7 +160,7 @@ static void HandleClient( uint32_t clientIndex )
         }
         else if ( bytesReceived > 0 )
         {
-            s_clientHandler( recvBuffer, bytesReceived );
+            s_clientHandler( clientSocket, recvBuffer, bytesReceived );
         }
         else
         {

@@ -260,6 +260,18 @@ std::vector<Genre> Story::Genres() const
 }
 
 
+bool Story::HasFandom( FandomIndex fandom ) const
+{
+    uint8_t fandomCount = FandomCount();
+    FandomIndex* fandoms = reinterpret_cast<FandomIndex*>( data.get() + fandomsOffset + 1 );
+    for ( uint8_t i = 0; i < fandomCount; ++i )
+    {
+        if ( fandoms[i] == fandom ) return true;
+    }
+    return false;
+}
+
+
 bool Story::HasGenre( Genre genre ) const
 {
     if ( genres[0] != Genre::NONE && genres[0] == genre ) return true;

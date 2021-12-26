@@ -102,15 +102,15 @@ def ParseFFSearchPage( url, text ):
 def DownloadFFNetStories( baseUrl, maxPages=100000 ):
     #print( "Downloading stories..." )
 
-    HOST = '127.0.0.1'  # The server's hostname or IP address
-    PORT = 27015        # The port used by the server
+    HOST = '127.0.0.1'
+    PORT = 27015
 
     beginUrl = baseUrl + "&p="
 
     page = 1
     while page <= maxPages:
         url = beginUrl + str( page )
-        #print( "Parsing page:", page, "/", maxPages )
+        print( "Parsing page:", page, "/", maxPages )
         responseUrl, responseText = GetHTMLPage( url )
 
         # If the urls dont match, then you've requested beyond the last page of stories

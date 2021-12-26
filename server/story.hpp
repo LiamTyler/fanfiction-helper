@@ -7,7 +7,7 @@
 
 enum class StorySource : uint8_t
 {
-    ERROR = 0,
+    NONE  = 0,
     FF    = 1,
     AO3   = 2,
     COUNT = 3
@@ -160,7 +160,6 @@ public:
     uint8_t RelationshipCount() const;
     uint8_t FreeformTagCount() const;
 
-    bool HasFlag( StoryFlags flag ) const { return (flags & flag) != StoryFlags::NONE; }
     void SetFlag( StoryFlags flag ) { flags |= flag; }
     void RemoveFlag( StoryFlags flag ) { flags = flags & ~flag; }
     uint32_t StoryID() const { return storyID; }
@@ -172,11 +171,14 @@ public:
     time_t PublishDate() const { return publishDate; }
 
     std::vector<Genre> Genres() const;
-    bool HasGenre( Genre genre ) const;
     StorySource GetStorySource() const { return storySource; }
     ContentRating GetContentRating() const { return contentRating; }
     uint8_t MyQualityRating() const { return myQualityRating; }
     void SetMyQualityRating( int rating ) { myQualityRating = static_cast<uint8_t>( rating ); }
+
+    bool HasFlag( StoryFlags flag ) const { return (flags & flag) != StoryFlags::NONE; }
+    bool HasFandom( FandomIndex fandom ) const;
+    bool HasGenre( Genre genre ) const;
 
 private:
     std::shared_ptr<uint8_t[]> data;

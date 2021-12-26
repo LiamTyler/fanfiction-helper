@@ -22,8 +22,8 @@ def ScanAllFandoms():
 if __name__ == "__main__":
     #ScanAllFandoms()
     print( "Python Scraper spawned" )
-    DownloadFFNetStories( """https://www.fanfiction.net/game/League-of-Legends/?&srt=1&lan=1&r=10&len=1""" )
-    #DownloadFFNetStories( "https://www.fanfiction.net/Tiger-Bunny-%E3%82%BF%E3%82%A4%E3%82%AC%E3%83%BC-%E3%83%90%E3%83%8B%E3%83%BC-Crossovers/8401/0/", 1 )
+    #DownloadFFNetStories( """https://www.fanfiction.net/game/League-of-Legends/?&srt=1&lan=1&r=10&len=1""" )
+    DownloadFFNetStories( """https://www.fanfiction.net/book/Harry-Potter/?&srt=1&lan=1&r=10&len=10&c1=1""" )
 
     print( "Python Scraper closing" )
 

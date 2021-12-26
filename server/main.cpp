@@ -7,6 +7,11 @@
 #include <iostream>
 #include <thread>
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
 std::thread scraper;
 
 void StartPythonScraper_Internal()
@@ -32,6 +37,8 @@ enum ServerCmds : uint32_t
 {
     INVALID_OR_MISSING  = 0,
     UPDATE_OR_ADD_STORY = 1,
+    REQUEST_LIST_OF_FANDOMS = 2,
+    REQUEST_STORIES_FOR_FANDOM = 3,
 
     COUNT
 };
@@ -65,9 +72,12 @@ std::vector<std::string> ParseStringVector( char*& data )
     return v;
 }
 
+#define CHECK_SEND_RESULT( send, cmd ) int sendResult = send; if ( sendResult == SOCKET_ERROR ) { LOG_ERR( "HandleClientRequests for cmd %u failed with error: %d", cmd, WSAGetLastError() ); }
 
-void HandlePythonScraper( char* data, int bytesReceived )
+void HandleClientRequests( size_t inClientSocket, char* data, int bytesReceived )
 {
+    auto db = G_GetDatabase();
+    SOCKET clientSocket = (SOCKET)inClientSocket;
     uint32_t cmd = ParseUNum<uint32_t>( data );
     if ( cmd == INVALID_OR_MISSING )
     {
@@ -81,7 +91,7 @@ void HandlePythonScraper( char* data, int bytesReceived )
         data += tmp.length() + 1;
         if ( tmp == "FF" ) pStory.storySource = StorySource::FF;
         else if ( tmp == "AO3" ) pStory.storySource = StorySource::AO3;
-        else pStory.storySource = StorySource::ERROR;
+        else pStory.storySource = StorySource::NONE;
 
         pStory.title = ParseString( data );
         pStory.author = ParseString( data );
@@ -136,21 +146,62 @@ void HandlePythonScraper( char* data, int bytesReceived )
         }
 
         bool updated, needsChap1;
-        G_GetDatabase()->AddOrUpdateStory( pStory, &updated, &needsChap1 );
-        LOG( "Story %s updated: %u, needs chap1: %u", pStory.title.c_str(), updated, needsChap1 );
+        db->AddOrUpdateStory( pStory, &updated, &needsChap1 );
+        LOG( "Story %s (%u) updated: %u", pStory.title.c_str(), pStory.storyID, updated );
+    }
+    else if ( cmd == REQUEST_LIST_OF_FANDOMS )
+    {
+        const auto& fandoms = db->GetFandoms();
+
+        std::string sendMsg = "";
+        for ( const auto& fandom : fandoms )
+        {
+            sendMsg += fandom + '\0';
+            //sendMsg[sendMsg.length() - 1] = '\0';
+        }
+        sendMsg = std::to_string( sendMsg.length() + 1 ) + '\0' + sendMsg;
+        CHECK_SEND_RESULT( send( clientSocket, sendMsg.c_str(), (int)sendMsg.length() + 1, 0 ), REQUEST_LIST_OF_FANDOMS );
+    }
+    else if ( cmd == REQUEST_STORIES_FOR_FANDOM )
+    {
+        std::string fandom = std::string( data );
+        bool allFandoms = fandom == "All";
+        FandomIndex fIndex = UNKNOWN_OR_INVALID_FANDOM;
+        if ( !allFandoms )
+        {
+            fIndex = db->GetFandomIndexFromName( fandom );
+            if ( fIndex == UNKNOWN_OR_INVALID_FANDOM )
+            {
+                std::string sendMsg = std::to_string( sendMsg.length() + 1 ) + '\0' + sendMsg;
+                CHECK_SEND_RESULT( send( clientSocket, sendMsg.c_str(), (int)sendMsg.length() + 1, 0 ), REQUEST_STORIES_FOR_FANDOM );
+                return;
+            }
+        }
+
+        std::string sendMsg;
+        sendMsg.reserve( 8192 );
+        uint32_t numStories = db->NumStories();
+        int encodedStoryCount = 0;
+        for ( uint32_t storyIdx = 0; storyIdx < numStories; ++storyIdx )
+        {
+            const Story& story = db->GetStory( storyIdx );
+            if ( allFandoms || story.HasFandom( fIndex ) )
+            {
+                sendMsg += std::string( story.Title() ) + '\0' + std::string( story.StoryLink() ) + '\0';
+                ++encodedStoryCount;
+                if ( encodedStoryCount >= 10 )
+                {
+                    break;
+                }
+            }
+        }
+        sendMsg = std::to_string( sendMsg.length() + 1 ) + '\0' + sendMsg;
+        CHECK_SEND_RESULT( send( clientSocket, sendMsg.c_str(), (int)sendMsg.length() + 1, 0 ), REQUEST_STORIES_FOR_FANDOM );
     }
     else
     {
         LOG_ERR( "Unknown client cmd %u", cmd );
     }
-
-    //std::string sendMsg = "message recieved";
-    //int iSendResult = send( s_clientSocket, sendMsg.c_str(), (int)sendMsg.length() + 1, 0 );
-    //if ( iSendResult == SOCKET_ERROR )
-    //{
-    //    LOG_ERR( "send failed with error: %d", WSAGetLastError() );
-    //    clientConnected = false;
-    //}
 }
 
 
@@ -234,7 +285,7 @@ int main()
     Logger_AddLogLocation( "log_serverCPP", "log_serverCPP.txt" );
 
     G_GetDatabase()->Load( "../database/database" );
-    server::Init( HandlePythonScraper );
+    server::Init( HandleClientRequests );
     //StartPythonScraper();
 
     std::string cmd;

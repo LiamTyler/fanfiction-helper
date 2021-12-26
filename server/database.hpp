@@ -22,7 +22,9 @@ public:
     const Character& GetCharacter( CharacterIndex index ) const        { return characters[index]; }
     const Story& GetStory( StoryIndex index ) const                    { return stories[index]; }
     uint32_t NumStories() const                                        { return static_cast<uint32_t>( stories.size() ); }
-    void StopAutosave() { m_stopAutosave = true; }
+    void StopAutosave()                                                { m_stopAutosave = true; }
+    const std::vector<Fandom>& GetFandoms() const                      { return fandoms; }
+    FandomIndex GetFandomIndexFromName( const std::string& name ) const;
 
 private:
     FandomIndex AddOrGetFandom( const Fandom& fandom );

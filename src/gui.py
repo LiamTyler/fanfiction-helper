@@ -1,36 +1,42 @@
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from story_database import *
-import os
+import socket
+from story import EncodeNum, EncodeStr
 
+PACKET_SIZE = 8192
 WINDOW_SIZE = [ 800, 1200 ]
 
-class FandomInfo:
-    def __init__( self, name, db ):
-        self.name = name
-        self.db = db
+SERVER_CMD_REQUEST_FANDOMS = 2
+SERVER_CMD_REQUEST_FANDOM_STORIES = 3
 
-class FandomInfoListItem( QListWidgetItem ):
-    def __init__( self, fandomName ):
-        super().__init__()
-        self.name = fandomName
-        self.setText( fandomName )
-        #self.setFont( STENCIL_FONT )
+def SendDataToServer( data ):
+    s = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
+    s.connect( ('127.0.0.1', 27015) )
+    s.sendall( data )
+    return s
 
-class StoryDesc( QListWidgetItem ):
-    def __init__( self, story ):
-        super().__init__()
-        self.story = story
-        self.setText( story.__str__() )
+def ReceiveDataFromServer( s ):
+    data = s.recv( PACKET_SIZE ).decode()
+    p = data.find( '\0' )
+    dataSize = int( data[:p] )
+    receivedSize = len( data ) - p - 1
+    while receivedSize != dataSize:
+        newData = s.recv( PACKET_SIZE )
+        if not newData:
+            break
+        receivedSize += len( newData )
+        data += newData.decode()
+
+    return data
 
 class StoryListItem( QListWidgetItem ):
-    def __init__( self, story ):
+    def __init__( self, title, url ):
         super().__init__()
-        self.story = story
-        showString = story.title + " by " + story.author
+        self.title = title
+        self.url = url
+        showString = title
         self.setText( showString )
-        #self.setFont( STENCIL_FONT )
 
 class MainWindow( QMainWindow ):
     def __init__( self ):
@@ -42,22 +48,8 @@ class MainWindow( QMainWindow ):
         self._verticalLayout = QVBoxLayout()
         self._centralWidget.setLayout( self._verticalLayout )
         self.fandoms = {}
-        self.RefreshInfo()
         self.MainMenu()
         self.show()
-
-    def RefreshInfo( self ):
-        fandoms = {}
-        dirs = [name for name in os.listdir( "fandoms/" ) if os.path.isdir( "fandoms/" + name )]
-        for i in range( len( dirs ) ):
-            fandom = dirs[i]
-            fandomPath = "fandoms/" + fandom + "/"
-            dbName = fandomPath + "databases/regular.bin"
-            if os.path.exists( dbName ):
-                storyDB = LoadStoryDB( dbName )
-                fandoms[fandom] = FandomInfo( fandom, storyDB )
-
-        self.fandoms = fandoms
 
     def _clearLayout( self, layout ):
         if layout is not None:
@@ -77,27 +69,39 @@ class MainWindow( QMainWindow ):
         #    print( "space" )
 
     def OpenStoryUrl( self, storyListItem ):
-        story = storyListItem.story
-        QDesktopServices.openUrl( QUrl( story.GetUrl() ) )
+        url = storyListItem.url
+        QDesktopServices.openUrl( QUrl( url ) )
     
-    def FandomHome( self, s ):
+    def FandomHome( self, fandom ):
+        fandom = fandom.text()
         self._clearLayout( self._verticalLayout )
-        fandomInfo = self.fandoms[s.text()]
-        self.currentFandom = fandomInfo
+        self.setWindowTitle( "Fandom: " + fandom )
+
+        s = SendDataToServer( EncodeNum( SERVER_CMD_REQUEST_FANDOM_STORIES ) + EncodeStr( fandom ) )
+        data = ReceiveDataFromServer( s )
+
+        split = data.split( '\0' )[1:-2]
+        stories = split[::2]
+        urls = split[1::2]
+        numStories = len( split ) // 2
         vlist = QListWidget( self )
-        for story in fandomInfo.db.stories:
-            vlist.addItem( StoryListItem( story ) )
+        for i in range(numStories):
+            vlist.addItem( StoryListItem( stories[i], urls[i] ) )
         scrollBar = QScrollBar()
         vlist.setVerticalScrollBar( scrollBar )
         vlist.itemClicked.connect( self.OpenStoryUrl )
-        #vlist.setCurrentRow( 5 )
         self._verticalLayout.addWidget( vlist )
 
     def MainMenu( self ):
         self.setWindowTitle( "Select Fandom" )
         self._clearLayout( self._verticalLayout )
 
+        s = SendDataToServer( EncodeNum( SERVER_CMD_REQUEST_FANDOMS ) )
+        data = ReceiveDataFromServer( s )
+        self.fandoms = data.split( '\0' )[1:-2]
+
         vlist = QListWidget( self )
+        vlist.addItem( QListWidgetItem( "All" ) )
         for fandomName in self.fandoms:
             vlist.addItem( QListWidgetItem( fandomName ) )
         scrollBar = QScrollBar()

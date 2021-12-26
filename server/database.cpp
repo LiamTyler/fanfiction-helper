@@ -270,6 +270,14 @@ StoryIndex Database::AddOrUpdateStory( const ParsedStory& pStory, bool* outShoul
 }
 
 
+FandomIndex Database::GetFandomIndexFromName( const std::string& name ) const
+{
+    auto it = fandomToIndexMap.find( name );
+    if ( it == fandomToIndexMap.end() ) return UNKNOWN_OR_INVALID_FANDOM;
+    else return it->second;
+}
+
+
 FandomIndex Database::AddOrGetFandom( const Fandom& fandom )
 {
     FandomIndex ret;
