@@ -7,7 +7,7 @@
 
 #include "core_defines.hpp"
 
-#define ROOT_DIR "/"
+#define ROOT_DIR "C:/Users/Liam Tyler/Documents/fanfiction-manager/"
 
 #define LINUX_PROGRAM   NOT_IN_USE
 #define WINDOWS_PROGRAM IN_USE

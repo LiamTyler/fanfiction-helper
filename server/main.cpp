@@ -16,7 +16,8 @@ std::thread scraper;
 
 void StartPythonScraper_Internal()
 {
-    system( "python ../../src/main.py" );
+    std::string cmd = "python \"" + std::string( ROOT_DIR ) + "python/scraper.py\"";
+    system( cmd.c_str() );
     LOG( "Done with python" );
 }
 
@@ -157,7 +158,6 @@ void HandleClientRequests( size_t inClientSocket, char* data, int bytesReceived 
         for ( const auto& fandom : fandoms )
         {
             sendMsg += fandom + '\0';
-            //sendMsg[sendMsg.length() - 1] = '\0';
         }
         sendMsg = std::to_string( sendMsg.length() + 1 ) + '\0' + sendMsg;
         CHECK_SEND_RESULT( send( clientSocket, sendMsg.c_str(), (int)sendMsg.length() + 1, 0 ), REQUEST_LIST_OF_FANDOMS );
@@ -187,7 +187,7 @@ void HandleClientRequests( size_t inClientSocket, char* data, int bytesReceived 
             const Story& story = db->GetStory( storyIdx );
             if ( allFandoms || story.HasFandom( fIndex ) )
             {
-                sendMsg += std::string( story.Title() ) + '\0' + std::string( story.StoryLink() ) + '\0';
+                sendMsg += db->EncodeStoryForNetwork( storyIdx );
                 ++encodedStoryCount;
                 if ( encodedStoryCount >= 10 )
                 {
@@ -285,9 +285,9 @@ int main()
     Logger_AddLogLocation( "stdout", stdout );
     Logger_AddLogLocation( "log_serverCPP", "log_serverCPP.txt" );
 
-    G_GetDatabase()->Load( "../database/database" );
+    G_GetDatabase()->Load( ROOT_DIR "database/database" );
     server::Init( HandleClientRequests );
-    //StartPythonScraper();
+    StartPythonScraper();
 
     std::string cmd;
     while ( true )
@@ -304,7 +304,7 @@ int main()
         }
     }
 
-    //EndPythonScraper();
+    EndPythonScraper();
     server::Shutdown();
     G_GetDatabase()->Shutdown();
     return 0;

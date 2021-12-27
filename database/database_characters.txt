@@ -1,0 +1,436 @@
+Jayce,U,0
+Viktor,U,0
+Jinx,U,0
+Lux,U,0
+Soraka,U,0
+Ahri,U,0
+OC,U,0
+Talon,U,0
+Katarina,U,0
+Darius,U,0
+Caitlyn,U,0
+Vi,U,0
+Jax,U,0
+Sivir,U,0
+Ezreal,U,0
+Yasuo,U,0
+Kai'Sa,U,0
+Zoe,U,0
+LeBlanc,U,0
+Pyke,U,0
+Poppy,U,0
+Riven,U,0
+Hecarim,U,0
+Lucian,U,0
+Ekko,U,0
+Kindred,U,0
+Garen,U,0
+Evelynn,U,0
+Warwick,U,0
+Irelia,U,0
+Syndra,U,0
+Renekton,U,0
+Cassiopeia,U,0
+Akali,U,0
+Sett,U,0
+Jhin,U,0
+Heimerdinger,U,0
+Tristana,U,0
+Lulu,U,0
+Fiora,U,0
+Quinn,U,0
+Rell,U,0
+Nasus,U,0
+Zac,U,0
+Nidalee,U,0
+Jarvan IV,U,0
+Nocturne,U,0
+Fiddlesticks,U,0
+Sylas,U,0
+Twisted Fate,U,0
+Graves,U,0
+Swain,U,0
+Zed,U,0
+Mordekaiser,U,0
+Sona,U,0
+Aatrox,U,0
+Varus,U,0
+Diana,U,0
+Leona,U,0
+Aphelios,U,0
+Brand,U,0
+Karma,U,0
+Vayne,U,0
+Vladimir,U,0
+Veigar,U,0
+Wukong,U,0
+Qiyana,U,0
+Shyvana,U,0
+Aurelion Sol,U,0
+Cho'Gath,U,0
+Kayn,U,0
+Elise,U,0
+Volibear,U,0
+Kayle,U,0
+Morgana,U,0
+Zyra,U,0
+Kalista,U,0
+Kassadin,U,0
+Seraphine,U,0
+Ryze,U,0
+Miss Fortune,U,0
+Pantheon,U,0
+Neeko,U,0
+Shen,U,0
+Ashe,U,0
+Gnar,U,0
+Yorick,U,0
+Nami,U,0
+Sion,U,0
+Taliyah,U,0
+Thresh,U,0
+Nunu,U,0
+Tahm Kench,U,0
+Amumu,U,0
+Tryndamere,U,0
+Rakan,U,0
+Xayah,U,0
+Rengar,U,0
+Annie,U,0
+Teemo,U,0
+Galio,U,0
+Alune,U,0
+Janna,U,0
+Rhaast,U,0
+Draven,U,0
+Dr. Mundo,U,0
+Xin Zhao,U,0
+Sejuani,U,0
+Lissandra,U,0
+Azir,U,0
+Kennen,U,0
+Taric,U,0
+Master Yi,U,0
+Gangplank,U,0
+Camille,U,0
+Braum,U,0
+Ziggs,U,0
+Rumble,U,0
+Singed,U,0
+Urgot,U,0
+Rek'Sai,U,0
+Udyr,U,0
+Malzahar,U,0
+Orianna,U,0
+Xerath,U,0
+Nautilus,U,0
+Lee Sin,U,0
+Illaoi,U,0
+Zilean,U,0
+Malphite,U,0
+Karthus,U,0
+Blitzcrank,U,0
+Olaf,U,0
+Kha'Zix,U,0
+Vel'Koz,U,0
+Twitch,U,0
+Anivia,U,0
+Shaco,U,0
+Corki,U,0
+Fizz,U,0
+Rammus,U,0
+Maokai,U,0
+Bard,U,0
+Kog'Maw,U,0
+Trundle,U,0
+Gragas,U,0
+Skarner,U,0
+Alistar,U,0
+Harry P.,U,1
+Hermione G.,U,1
+Daphne G.,U,1
+OC,U,1
+Severus S.,U,1
+Ron W.,U,1
+Petunia D.,U,1
+Dudley D.,U,1
+Vernon D.,U,1
+Fleur D.,U,1
+Voldemort,U,1
+Albus D.,U,1
+Dennis C.,U,1
+Sirius B.,U,1
+Tom R. Jr.,U,1
+Andromeda T.,U,1
+Fred W.,U,1
+George W.,U,1
+Remus L.,U,1
+Ginny W.,U,1
+Katie B.,U,1
+Oliver W.,U,1
+Angelina J.,U,1
+Draco M.,U,1
+Neville L.,U,1
+Alice L.,U,1
+Frank L.,U,1
+Fawkes,U,1
+Dean T.,U,1
+Seamus F.,U,1
+Bellatrix L.,U,1
+Colin C.,U,1
+Susan B.,U,1
+Teddy L.,U,1
+Astoria G.,U,1
+Narcissa M.,U,1
+Viktor K.,U,1
+Cedric D.,U,1
+Rubeus H.,U,1
+Poppy P.,U,1
+Regulus B.,U,1
+Gellert G.,U,1
+Luna L.,U,1
+Xenophilius L.,U,1
+Rita S.,U,1
+James P.,U,1
+Bill W.,U,1
+Marauders,U,1
+N. Tonks,U,1
+Newt S.,U,1
+Cho C.,U,1
+Blaise Z.,U,1
+Pansy P.,U,1
+Minerva M.,U,1
+Theodore N.,U,1
+Dolores U.,U,1
+Peter P.,U,1
+Charlus P.,U,1
+Arcturus B.,U,1
+Horace S.,U,1
+Demelza R.,U,1
+Lily Evans P.,U,1
+Delphi Riddle,U,1
+Albus S. P.,U,1
+Scorpius M.,U,1
+T. Rowle,U,1
+Myrtle,U,1
+Mr. Borgin,U,1
+Gabrielle D.,U,1
+Hedwig,U,1
+Lavender B.,U,1
+Lily Luna P.,U,1
+Salazar S.,U,1
+Hannah A.,U,1
+Anthony G.,U,1
+Michael C.,U,1
+Rose W.,U,1
+Charlie W.,U,1
+Padma P.,U,1
+Parvati P.,U,1
+Millicent B.,U,1
+Percy W.,U,1
+Arthur W.,U,1
+Megan J.,U,1
+Flora C.,U,1
+Hestia C.,U,1
+Terry B.,U,1
+Tom R. Sr.,U,1
+Percival G.,U,1
+Sanguini,U,1
+Eldred W.,U,1
+F. Flitwick,U,1
+Su L.,U,1
+Amelia B.,U,1
+Dr. Granger,U,1
+Kreacher,U,1
+Tracey D.,U,1
+Dobby,U,1
+Barty C. Jr.,U,1
+Justin F.,U,1
+Lucius M.,U,1
+Nagini,U,1
+Mrs. Zabini,U,1
+Lisa T.,U,1
+Death,U,1
+James S. P.,U,1
+Molly W.,U,1
+Morgana,U,1
+Alicia S.,U,1
+Alastor M.,U,1
+Cygnus B.,U,1
+Pollux B.,U,1
+Norberta,U,1
+Merula S.,U,1
+Cornelius F.,U,1
+Victoire W.,U,1
+Penelope C.,U,1
+Orion B.,U,1
+Thomas R.,U,1
+Alphard B.,U,1
+Abraxas M.,U,1
+Mundungus F.,U,1
+A. Sinistra,U,1
+Kingsley S.,U,1
+Gilderoy L.,U,1
+Marietta E.,U,1
+Rodolphus L.,U,1
+Rabastan L.,U,1
+G. Ollivander,U,1
+Marcus F.,U,1
+Penny H.,U,1
+Fenrir G.,U,1
+Mandy B.,U,1
+Basilisk,U,1
+Cassiopeia B.,U,1
+Gemma F.,U,1
+Leta L.,U,1
+Tobias S.,U,1
+Walburga B.,U,1
+Helga H.,U,1
+Herpo the Foul,U,1
+Leanne,U,1
+Dorea Black/Potter,U,1
+Lee J.,U,1
+Mulciber,U,1
+Sally-Anne P.,U,1
+Bathilda B.,U,1
+Mrs. Granger,U,1
+Evan R.,U,1
+Theseus S.,U,1
+Dominique W.,U,1
+Aberforth D.,U,1
+Merope G.,U,1
+Cormac M.,U,1
+Sorting Hat,U,1
+G. Montague,U,1
+Godric G.,U,1
+Crookshanks,U,1
+Q. Quirrell,U,1
+S. Vector,U,1
+Dementors,U,1
+Nicolas F.,U,1
+Hestia J.,U,1
+Adrian P.,U,1
+Whomping Willow,U,1
+Marlene M.,U,1
+Founders,U,1
+Perenelle F.,U,1
+A. Dippet,U,1
+Nott,U,1
+Charity B.,U,1
+Alecto C.,U,1
+Marius B.,U,1
+Sybill T.,U,1
+Ernie M.,U,1
+Antonin D.,U,1
+Rowena R.,U,1
+Zacharias S.,U,1
+Dorcas M.,U,1
+Hope L.,U,1
+Lycoris B.,U,1
+Mary M.,U,1
+I. Pince,U,1
+Argus F.,U,1
+Angelica C.,U,1
+P. Sprout,U,1
+Eileen P.,U,1
+Septimus W.,U,1
+Griphook,U,1
+L. Moon,U,1
+Gregory G.,U,1
+Mirror of Erised,U,1
+Augusta L.,U,1
+Ragnok,U,1
+Yaxley,U,1
+Merlin,U,1
+Wayne H.,U,1
+Sturgis P.,U,1
+Piers P.,U,1
+Fred W. II,U,1
+Barnabas Cuffe,U,1
+Malcolm mG.,U,1
+Winky,U,1
+Ignatius P.,U,1
+Augustus R.,U,1
+Scabior,U,1
+Fleamont P.,U,1
+Terence H.,U,1
+Rosmerta,U,1
+Cedrella B.,U,1
+Phineas Nigellus,U,1
+Fay D.,U,1
+Florence,U,1
+Vincent C.,U,1
+Rolf S.,U,1
+Arabella F.,U,1
+Herman W.,U,1
+Euphemia P.,U,1
+Fabian P.,U,1
+Gideon P.,U,1
+Marge D.,U,1
+Lyall L.,U,1
+Morag M.,U,1
+Avery,U,1
+William the Pukwudgie,U,1
+Callidora B.,U,1
+Muriel W.,U,1
+Jacob's sibling,U,1
+Aragog,U,1
+Phoebe B.,U,1
+Ted T.,U,1
+Audrey W.,U,1
+Morfin G.,U,1
+Ignotus P.,U,1
+Walden M.,U,1
+I. Karkaroff,U,1
+Isolt S.,U,1
+James S.,U,1
+Emmeline V.,U,1
+C. Fudge,U,1
+Antioch P.,U,1
+Cadmus P.,U,1
+Morrigan,U,1
+Ariana D.,U,1
+Barty C. Sr.,U,1
+Credence B.,U,1
+Charis B.,U,1
+Laura M.,U,1
+Rose Zeller,U,1
+Orla Q.,U,1
+C. Warrington,U,1
+Hugo W.,U,1
+Amycus C.,U,1
+Bloody Baron,U,1
+Vaisey,U,1
+Isobel M.,U,1
+Poliakoff,U,1
+Roxanne W.,U,1
+Lucy W.,U,1
+Pius T.,U,1
+Isla B.,U,1
+Harfang L.,U,1
+Firenze,U,1
+Rufus S.,U,1
+Selwyn,U,1
+S. Kettleburn,U,1
+Harper,U,1
+Miles B.,U,1
+Lysander S.,U,1
+Romilda V.,U,1
+Amos D.,U,1
+Fat Friar,U,1
+Lucretia B.,U,1
+Kevin E.,U,1
+Roger D.,U,1
+Peeves,U,1
+Isobel mG.,U,1
+Stephen C.,U,1
+Helena R.,U,1
+Jimmy P.,U,1
+Olympe M.,U,1
+Louis W.,U,1
+Buckbeak,U,1
+Nearly Headless Nick,U,1
+Bane,U,1
+F. Quigley,U,1
+R. Hooch,U,1
+Fridwulfa,U,1

@@ -7,7 +7,7 @@
 
 #include "core_defines.hpp"
 
-#define ROOT_DIR "${PROGRESSION_DIR}/"
+#define ROOT_DIR "${ROOT_DIR}"
 
 #define LINUX_PROGRAM   ${LINUX_PROGRAM}
 #define WINDOWS_PROGRAM ${WINDOWS_PROGRAM}

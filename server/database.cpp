@@ -278,6 +278,37 @@ FandomIndex Database::GetFandomIndexFromName( const std::string& name ) const
 }
 
 
+std::string Database::EncodeStoryForNetwork( StoryIndex storyIndex ) const
+{
+    const Story& s = stories[storyIndex];
+    std::string e;
+    e.reserve( 8192 );
+    e += std::to_string( (uint8_t)s.storySource ) + '\0';
+    e += s.Title(); e += '\0';
+    e += s.Author(); e += '\0';
+    e += s.Description(); e += '\0';
+
+    auto characters = s.Characters();
+    e += std::to_string( characters.size() ) + '\0';
+    for ( auto c : characters )
+    {
+        const auto& chr = GetCharacter( c.characterIndex );
+        e += chr.name + '\0';
+    }
+
+    e += std::to_string( s.storyID ) + '\0';
+    e += std::to_string( (uint32_t)s.flags ) + '\0';
+    e += std::to_string( s.wordCount ) + '\0';
+    e += std::to_string( s.chapterCount ) + '\0';
+    e += std::to_string( s.reviewCount ) + '\0';
+    e += std::to_string( s.favoritesCount ) + '\0';
+    e += std::to_string( s.followCount ) + '\0';
+    e += std::to_string( (uint8_t)s.contentRating ) + '\0';
+
+    return e;
+}
+
+
 FandomIndex Database::AddOrGetFandom( const Fandom& fandom )
 {
     FandomIndex ret;

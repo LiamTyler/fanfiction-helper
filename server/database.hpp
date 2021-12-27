@@ -25,6 +25,7 @@ public:
     void StopAutosave()                                                { m_stopAutosave = true; }
     const std::vector<Fandom>& GetFandoms() const                      { return fandoms; }
     FandomIndex GetFandomIndexFromName( const std::string& name ) const;
+    std::string EncodeStoryForNetwork( StoryIndex storyIndex ) const;
 
 private:
     FandomIndex AddOrGetFandom( const Fandom& fandom );

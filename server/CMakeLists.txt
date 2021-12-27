@@ -10,8 +10,7 @@ set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 
 SET_PLATFORM_DEFINES()
 
-set(ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-configure_file(${ROOT_DIR}/cmake/platform_defines.hpp.in ${ROOT_DIR}/shared/platform_defines.hpp)
+configure_file(${ROOT_DIR}/server/cmake/platform_defines.hpp.in ${ROOT_DIR}/server/shared/platform_defines.hpp)
 
 find_package(OpenMP REQUIRED)
 
@@ -42,3 +41,4 @@ set(SRC
 add_executable(${PROJECT_NAME} ${SRC})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 SET_TARGET_COMPILE_OPTIONS_DEFAULT(${PROJECT_NAME})
+SET_TARGET_AS_DEFAULT_VS_PROJECT(${PROJECT_NAME})
