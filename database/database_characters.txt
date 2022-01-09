@@ -1,25 +1,589 @@
-Caitlyn,U,0
-Jayce,U,0
-Vi,U,0
+Caitlyn,F,0
+Jayce,M,0
+Vi,F,0
 OC,U,0
-Yasuo,U,0
-Irelia,U,0
-Viktor,U,0
-Jinx,U,0
-Ekko,U,0
-Jax,U,0
-Sivir,U,0
-Akali,U,0
-Evelynn,U,0
-Vayne,U,0
-Vladimir,U,0
-Seraphine,U,0
-Lux,U,0
-Talon,U,0
-Katarina,U,0
-Darius,U,0
-Sett,U,0
-Ezreal,U,0
-Kai'Sa,U,0
-Miss Fortune,U,0
-Ahri,U,0
+Yasuo,M,0
+Irelia,F,0
+Viktor,M,0
+Jinx,F,0
+Ekko,M,0
+Jax,M,0
+Sivir,F,0
+Akali,F,0
+Evelynn,F,0
+Vayne,F,0
+Vladimir,M,0
+Seraphine,F,0
+Lux,F,0
+Talon,M,0
+Katarina,F,0
+Darius,M,0
+Sett,M,0
+Ezreal,M,0
+Kai'Sa,F,0
+Miss Fortune,F,0
+Ahri,F,0
+Yorick,M,0
+Hecarim,M,0
+Kalista,F,0
+Heimerdinger,M,0
+Jarvan IV,M,0
+Nocturne,U,0
+Poppy,F,0
+Gnar,M,0
+Warwick,M,0
+Cassiopeia,F,0
+Zed,M,0
+Quinn,F,0
+Aatrox,M,0
+Soraka,F,0
+Nidalee,F,0
+Sona,F,0
+Riven,F,0
+Kindred,U,0
+Tristana,F,0
+Lulu,F,0
+Zoe,F,0
+LeBlanc,F,0
+Pyke,M,0
+Lucian,M,0
+Garen,M,0
+Syndra,F,0
+Renekton,M,0
+Jhin,M,0
+Fiora,F,0
+Rell,F,0
+Nasus,M,0
+Zac,M,0
+Fiddlesticks,U,0
+Sylas,M,0
+Twisted Fate,F,0
+Graves,M,0
+Swain,M,0
+Mordekaiser,M,0
+Varus,M,0
+Diana,F,0
+Leona,F,0
+Aphelios,M,0
+Brand,M,0
+Karma,F,0
+Veigar,M,0
+Wukong,M,0
+Qiyana,F,0
+Shyvana,F,0
+Aurelion Sol,M,0
+Cho'Gath,U,0
+Kayn,M,0
+Elise,F,0
+Volibear,M,0
+Kayle,F,0
+Morgana,F,0
+Zyra,F,0
+Kassadin,M,0
+Ryze,M,0
+Pantheon,M,0
+Neeko,F,0
+Shen,M,0
+Ashe,F,0
+Nami,F,0
+Sion,M,0
+Thresh,M,0
+Nunu,M,0
+Tahm Kench,M,0
+Amumu,M,0
+Tryndamere,M,0
+Rakan,M,0
+Xayah,F,0
+Rengar,M,0
+Annie,F,0
+Teemo,M,0
+Galio,M,0
+Alune,F,0
+Taliyah,F,0
+Janna,F,0
+Rhaast,U,0
+Draven,M,0
+Dr. Mundo,M,0
+Xin Zhao,M,0
+Sejuani,F,0
+Lissandra,F,0
+Azir,M,0
+Kennen,M,0
+Taric,M,0
+Master Yi,M,0
+Gangplank,M,0
+Camille,F,0
+Braum,M,0
+Ziggs,M,0
+Rumble,M,0
+Singed,M,0
+Urgot,M,0
+Rek'Sai,U,0
+Udyr,M,0
+Malzahar,M,0
+Orianna,F,0
+Xerath,M,0
+Nautilus,M,0
+Lee Sin,M,0
+Illaoi,F,0
+Zilean,M,0
+Malphite,M,0
+Karthus,M,0
+Blitzcrank,M,0
+Olaf,M,0
+Kha'Zix,U,0
+Vel'Koz,U,0
+Twitch,M,0
+Anivia,F,0
+Shaco,M,0
+Corki,M,0
+Fizz,M,0
+Rammus,U,0
+Maokai,M,0
+Bard,M,0
+Kog'Maw,U,0
+Trundle,M,0
+Gragas,M,0
+Skarner,U,0
+Alistar,M,0
+Harry P.,M,1
+Hermione G.,F,1
+Draco M.,M,1
+Tom R. Jr.,M,1
+Gilderoy L.,M,1
+Sirius B.,M,1
+Remus L.,M,1
+James P.,M,1
+Peter P.,M,1
+Fred W.,M,1
+Adrian P.,M,1
+George W.,M,1
+OC,U,1
+Percy W.,M,1
+Audrey W.,F,1
+Ron W.,M,1
+Luna L.,F,1
+Neville L.,M,1
+Salazar S.,M,1
+Sanguini,M,1
+Eldred W.,M,1
+Severus S.,M,1
+Dudley D.,M,1
+Ginny W.,F,1
+Daphne G.,F,1
+Fleur D.,F,1
+Tracey D.,F,1
+F. Flitwick,M,1
+N. Tonks,F,1
+Talbott W.,U,1
+Voldemort,M,1
+Teddy L.,M,1
+Lily Evans P.,F,1
+Bellatrix L.,F,1
+Minerva M.,F,1
+Narcissa M.,F,1
+Lavender B.,F,1
+Alice L.,F,1
+Frank L.,M,1
+Regulus B.,M,1
+Dr. Granger,M,1
+Albus D.,M,1
+Cedric D.,M,1
+Basilisk,M,1
+Dennis C.,M,1
+Selwyn,M,1
+Pansy P.,F,1
+Astoria G.,F,1
+Fawkes,U,1
+Lucius M.,M,1
+Merula S.,F,1
+Rodolphus L.,M,1
+Rabastan L.,M,1
+Delphi Riddle,F,1
+Millicent B.,F,1
+Andromeda T.,F,1
+Albus S. P.,M,1
+Scorpius M.,M,1
+Rose W.,F,1
+Eileen P.,F,1
+Marauders,M,1
+Angelina J.,F,1
+Katie B.,F,1
+Alicia S.,F,1
+Blaise Z.,M,1
+Molly W.,F,1
+Arthur W.,M,1
+Theodore N.,M,1
+Dorcas M.,M,1
+Poppy P.,F,1
+Charlus P.,M,1
+Arcturus B.,M,1
+Hedwig,F,1
+Colin C.,M,1
+Marcus F.,M,1
+Rubeus H.,M,1
+Abraxas M.,M,1
+Alastor M.,M,1
+James S. P.,M,1
+Viktor K.,M,1
+Piers P.,M,1
+Lily Luna P.,F,1
+Nigel W.,M,1
+Susan B.,F,1
+Hannah A.,F,1
+Demelza R.,F,1
+Bill W.,M,1
+Charlie W.,M,1
+Marlene M.,F,1
+Padma P.,F,1
+A. Sinistra,F,1
+Gemma F.,M,1
+Kreacher,M,1
+Petunia D.,F,1
+Norberta,F,1
+Walburga B.,F,1
+Ted T.,M,1
+Orion B.,M,1
+Victoire W.,F,1
+Antonin D.,M,1
+Anthony G.,M,1
+Michael C.,M,1
+Gideon P.,M,1
+Fabian P.,M,1
+Vernon D.,M,1
+Amelia B.,F,1
+Alphard B.,M,1
+Gabrielle D.,F,1
+Oliver W.,M,1
+Horace S.,M,1
+Gellert G.,M,1
+Kingsley S.,M,1
+Death,F,1
+Flora C.,F,1
+Hestia C.,F,1
+Cornelius F.,M,1
+Penelope C.,F,1
+Dean T.,M,1
+Nicolas F.,M,1
+Perenelle F.,F,1
+Fenrir G.,M,1
+Terry B.,M,1
+Fred W. II,M,1
+Newt S.,M,1
+I. Karkaroff,M,1
+Poliakoff,M,1
+T. Rowle,M,1
+Tom R. Sr.,M,1
+Godric G.,M,1
+Rowena R.,F,1
+Merope G.,F,1
+Nagini,U,1
+G. Ollivander,M,1
+L. Moon,F,1
+Ernie M.,M,1
+Thomas R.,M,1
+Aberforth D.,M,1
+Hugo W.,M,1
+Louis W.,M,1
+Helga H.,F,1
+P. Sprout,F,1
+Xenophilius L.,M,1
+Roxanne W.,F,1
+Su L.,F,1
+Megan J.,F,1
+Cho C.,F,1
+Ariana D.,F,1
+Derek,M,1
+Isobel M.,F,1
+Penny H.,F,1
+Morgana,F,1
+Barty C. Jr.,M,1
+Myrtle,M,1
+Henry P.,M,1
+Mr. Granger,U,1
+Mrs. Granger,F,1
+Scabior,M,1
+R. Hooch,F,1
+I. Pince,M,1
+Dorea Black/Potter,F,1
+Mrs. Zabini,F,1
+Rita S.,F,1
+Dolores U.,F,1
+Theseus S.,M,1
+Leta L.,F,1
+Mr. Borgin,U,1
+Avery,M,1
+Parvati P.,F,1
+Vincent C.,M,1
+Ben C.,M,1
+Rowan K.,M,1
+Jacob's sibling,M,1
+Percival G.,M,1
+Founders,U,1
+Dobby,M,1
+Dominique W.,F,1
+Justin F.,M,1
+Lee J.,M,1
+Lisa T.,F,1
+C. Warrington,M,1
+Nearly Headless Nick,M,1
+Sorting Hat,M,1
+Phineas B.,M,1
+Evan R.,M,1
+Gregory G.,M,1
+J. Dawlish,M,1
+Mary R.,F,1
+Molly W. II,F,1
+Tobias S.,M,1
+Cygnus B.,M,1
+Pollux B.,M,1
+Hesper G.,M,1
+Melania M.,F,1
+Yaxley,M,1
+Argus F.,M,1
+Savage,M,1
+Mundungus F.,M,1
+Seamus F.,M,1
+Rolf S.,M,1
+Pandora L.,F,1
+Hope L.,F,1
+Lyall L.,M,1
+Hope H.,F,1
+Lysander S.,M,1
+Marietta E.,F,1
+S. Vector,F,1
+Q. Quirrell,M,1
+Alecto C.,F,1
+Hestia J.,F,1
+Mary M.,F,1
+Amycus C.,M,1
+Rosier,M,1
+Mandy B.,F,1
+Sally-Anne P.,F,1
+Lestrange,U,1
+Cassiopeia B.,F,1
+Peeves,M,1
+C. Binns,M,1
+Bloody Baron,M,1
+Lucy W.,F,1
+Herpo the Foul,M,1
+Leanne,F,1
+Barty C. Sr.,M,1
+G. Montague,M,1
+Merlin,M,1
+Mulciber,M,1
+Bathilda B.,F,1
+Barnaby L.,M,1
+Cormac M.,M,1
+Emmeline V.,F,1
+Wilkes,M,1
+Crookshanks,M,1
+Edgar B.,M,1
+Walden M.,M,1
+Hepzibah S.,F,1
+Dementors,M,1
+Whomping Willow,U,1
+Lucretia B.,F,1
+Roger D.,M,1
+Lorcan S.,M,1
+Winky,F,1
+A. Dippet,M,1
+Nott,M,1
+Charity B.,F,1
+Marius B.,M,1
+Sybill T.,F,1
+Zacharias S.,M,1
+Benjy F.,M,1
+Augustus R.,M,1
+Helena R.,F,1
+Lycoris B.,M,1
+Stephen C.,M,1
+Angelica C.,F,1
+Phineas Nigellus,M,1
+Kendra D.,F,1
+Eupraxia M.,F,1
+Septimus W.,M,1
+Griphook,M,1
+Marvolo G.,M,1
+Morfin G.,M,1
+Mirror of Erised,U,1
+Euphemia P.,F,1
+Fleamont P.,M,1
+Elladora B.,F,1
+Isla B.,F,1
+Druella B.,F,1
+Vaisey,M,1
+Augusta L.,F,1
+Florean Fortescue,M,1
+Ragnok,U,1
+Wayne H.,M,1
+Ernie P.,M,1
+Sturgis P.,M,1
+Verity,F,1
+Ignotus P.,M,1
+Ludo B.,M,1
+Barnabas Cuffe,M,1
+Malcolm mG.,M,1
+Eloise M.,F,1
+Tom the barman,U,1
+Pius T.,M,1
+Proudfoot,M,1
+Ignatius P.,M,1
+Oliver R.,M,1
+Giant Squid,M,1
+Terence H.,M,1
+Rosmerta,F,1
+Cedrella B.,F,1
+Rose Zeller,F,1
+Fay D.,F,1
+Florence,M,1
+Gibbon,M,1
+Arabella F.,F,1
+Herman W.,M,1
+Felix R.,M,1
+Marge D.,F,1
+A. Kirke,M,1
+A. Lynch,M,1
+A. Pye,M,1
+Albert R.,M,1
+Alexia B.,F,1
+Ambrosius F.,M,1
+Amos D.,M,1
+Amy B.,F,1
+Antioch P.,M,1
+Apollyon P.,M,1
+Aragog,M,1
+Bane,M,1
+Belvina B.,M,1
+Bertha J.,F,1
+Bob H.,M,1
+Buckbeak,M,1
+C. Fudge,M,1
+Cadmus P.,M,1
+Cadwallader,M,1
+Callidora B.,F,1
+Caradoc D.,M,1
+Caspar C.,M,1
+Chadwick B.,M,1
+Charis B.,M,1
+Chester D.,M,1
+Connolly,M,1
+Credence B.,M,1
+Dedalus D.,M,1
+Dennis B.,M,1
+Dilys D.,M,1
+Dirk C.,M,1
+Donaghan T.,M,1
+Eduardus B.,M,1
+Eleanor B.,F,1
+Elphias D.,M,1
+Elphinstone U.,M,1
+F. Quigley,M,1
+Fang,M,1
+Fat Friar,M,1
+Firenze,M,1
+Fluffy,U,1
+Frank B.,M,1
+Fridwulfa,F,1
+G. Jones,F,1
+G. Marchbanks,F,1
+G. Merrythought,F,1
+Gideon C.,M,1
+Gormlaith G.,M,1
+Grawp,M,1
+Hardwin P.,M,1
+Harfang L.,M,1
+Harper,M,1
+Hasan M.,M,1
+Heathcote B.,M,1
+Herbert B.,M,1
+Hester B.,M,1
+I. Volkov,M,1
+Iolanthe P.,F,1
+Irma C.,F,1
+Ismelda M.,F,1
+Isobel mG.,F,1
+Isolt S.,M,1
+Ivanova,F,1
+J. Sloper,M,1
+J. Wronski,M,1
+Jacob,M,1
+Jacob K.,M,1
+James S.,M,1
+Jason S.,M,1
+Jeremy S.,M,1
+Jimmy P.,M,1
+Karkaroff's Aide,M,1
+Karl J.,M,1
+Kevin E.,M,1
+Kirley D.,F,1
+L. Zamojski,M,1
+L. Zograf,M,1
+L. d'Eath,M,1
+Laura M.,F,1
+Levski,M,1
+Licorus B.,M,1
+Lisa C.,F,1
+Lysandra B.,F,1
+M. Bagnold,M,1
+Madam Malkin,F,1
+Mafalda Hopkirk,F,1
+Magorian,F,1
+Malcom P.,M,1
+Mark E.,M,1
+Martha S.,F,1
+Mary C.,F,1
+Maxine O.,F,1
+Merton G.,M,1
+Miles B.,M,1
+Morag M.,F,1
+Moran,M,1
+Morrigan,F,1
+Mrs. Lovegood,F,1
+Mrs. Norris,F,1
+Mullet,M,1
+Muriel W.,F,1
+Myron W.,M,1
+Olive H.,M,1
+Olympe M.,F,1
+Orla Q.,F,1
+Orsino T.,M,1
+Owen C.,M,1
+P. Vulchanov,F,1
+Panju P.,F,1
+Percival D.,M,1
+Phoebe B.,F,1
+Polly C.,F,1
+Porpentina S.,F,1
+Queenie G.,F,1
+Reg C.,M,1
+Reginald C.,M,1
+Rionach S.,M,1
+Rionach S. Jr.,M,1
+Ritchie C.,M,1
+Robert mG. Jr.,M,1
+Robert mG. Sr.,M,1
+Roger M.,M,1
+Romilda V.,F,1
+Ronan,M,1
+Rufus S.,M,1
+Ryan,M,1
+S. Cadogan,M,1
+S. Fawcett,M,1
+S. Kettleburn,M,1
+Sophie R.,F,1
+Stan S.,M,1
+Stebbins,M,1
+Stewart A.,M,1
+Summerby,M,1
+The Fat Lady,F,1
+Travers,M,1
+Trevor,M,1
+Troy,M,1
+Tulip K.,F,1
+W. Grubbly-Plank,M,1
+Webster B.,M,1
+William S.,M,1
+William the Pukwudgie,M,1
+Yann F.,F,1
+Úrsula F.,F,1

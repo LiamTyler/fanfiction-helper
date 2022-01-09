@@ -101,7 +101,7 @@ struct std::hash<Character>
 {
     size_t operator()( const Character& c ) const
     {
-        return std::hash<std::string>()(c.name);
+        return std::hash<std::string>()( c.name );
     }
 };
 

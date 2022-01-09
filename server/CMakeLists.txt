@@ -15,6 +15,7 @@ configure_file(${ROOT_DIR}/server/cmake/platform_defines.hpp.in ${ROOT_DIR}/serv
 find_package(OpenMP REQUIRED)
 
 set(SRC
+    client.cpp
     database.cpp
     database.hpp
     server.cpp

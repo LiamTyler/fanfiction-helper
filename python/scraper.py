@@ -159,10 +159,7 @@ def DownloadFFNetStories( baseUrl, maxPages=100000 ):
             
         page += 1
 
-if __name__ == "__main__":
-    print( "Python Scraper spawned" )
-    print( "cwd: ", os.getcwd() )
-
+def GetFandomsList():
     path = "fandom_urls.txt"
     for maxTries in range( 5 ):
         if not os.path.exists( path ):
@@ -179,11 +176,23 @@ if __name__ == "__main__":
         print( "Could not read the fandoms_url file:", path, ". Closing" )
         exit()
     
+    return fandoms
+
+if __name__ == "__main__":
+    print( "Python Scraper spawned" )
+    print( "cwd: ", os.getcwd() )
+    
     # serverThread = threading.Thread( target=ServerThreadHandler )
     # serverThread.start()
-    for fandom in fandoms:
-        f = fandom.strip()
-        print( "Scraping:", f )
-        DownloadFFNetStories( f, 1 )
+    while not ShouldShutdown():
+        fandoms = GetFandomsList()
+        for fandom in fandoms:
+            f = fandom.strip()
+            print( "Scraping:", f )
+            DownloadFFNetStories( f )
+        for i in range( 10 * 60 ):
+            if ShouldShutdown():
+                break
+            time.sleep( 1 )
     
     print( "Python Scraper closing" )

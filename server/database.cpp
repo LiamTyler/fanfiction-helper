@@ -47,7 +47,6 @@ void Database::Load( const std::string& dbName )
     if ( !s.OpenForRead( storyDBName ) )
     {
         LOG_WARN( "No database with name %s found. Continuing with new database...", dbName.c_str() );
-        m_autosaveThread = std::thread( &Database::Autosave, this );
         return;
     }
 
@@ -105,8 +104,6 @@ void Database::Load( const std::string& dbName )
             freeformTags.push_back( line );
         }
     }
-
-    m_autosaveThread = std::thread( &Database::Autosave, this );
 }
 
 
@@ -268,6 +265,17 @@ StoryIndex Database::AddOrUpdateStory( const ParsedStory& pStory, bool* outShoul
     if ( outNeedsChap1 ) *outNeedsChap1 = needsChap1;
 
     return storyIndex;
+}
+
+
+void Database::AddOrUpdateCharacter( const std::string& name, FandomIndex fandomIndex, Gender gender )
+{
+    Character c;
+    c.name = name;
+    c.fandomIndex = fandomIndex;
+    c.gender = gender;
+    CharacterIndex cIdx = AddOrGetCharacter( c );
+    characters[cIdx].gender = gender;
 }
 
 
