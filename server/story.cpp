@@ -77,10 +77,10 @@ void Story::Serialize( Serializer* s ) const
     uint16_t* udata16 = reinterpret_cast<uint16_t*>( data.get() );
     uint32_t dataLen = fandomsOffset;
     dataLen += 1 + sizeof( FandomIndex ) * data[fandomsOffset];
-    dataLen += 2 + sizeof( UpdateInfo ) * reinterpret_cast<uint16_t*>( data.get() + updatesOffset )[0];
     dataLen += 1 + sizeof( CharacterInstance ) * data[charactersOffset];
     dataLen += 1 + sizeof( Relationship ) * data[relationshipsOffset];
     dataLen += 1 + sizeof( FreeformTagIndex ) * data[freeFormTagsOffset];
+    dataLen += 2 + sizeof( UpdateInfo ) * reinterpret_cast<uint16_t*>( data.get() + updatesOffset )[0];
     s->Write( dataLen );
     s->Write( data.get(), dataLen );
 
@@ -95,10 +95,10 @@ void Story::Serialize( Serializer* s ) const
     s->Write( authorLinkOffset );
     s->Write( descriptionOffset );
     s->Write( fandomsOffset );
-    s->Write( updatesOffset );
     s->Write( charactersOffset );
     s->Write( relationshipsOffset );
     s->Write( freeFormTagsOffset );
+    s->Write( updatesOffset );
     
     s->Write( flags );
     s->Write( storyID );
@@ -136,10 +136,10 @@ void Story::Deserialize( Serializer* s )
     s->Read( authorLinkOffset );
     s->Read( descriptionOffset );
     s->Read( fandomsOffset );
-    s->Read( updatesOffset );
     s->Read( charactersOffset );
     s->Read( relationshipsOffset );
     s->Read( freeFormTagsOffset );
+    s->Read( updatesOffset );
 
     s->Read( flags );
     s->Read( storyID );

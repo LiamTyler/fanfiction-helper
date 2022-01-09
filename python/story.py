@@ -262,26 +262,26 @@ class Story:
                     self.relationships.append( Relationship( [ self.characters[r[i]], self.characters[r[j]] ], RelationshipType.ROMANTIC ) )
 
     def __str__( self ):
-        #s = "'" + self.title + "' by '" + self.author + "'"
+        s = "'" + self.title + "' by '" + self.author + "'"
 
-        s = "Title: " + self.title + '\n' + \
-            "Author: " + self.author + " -> " + self.author_link + '\n' + \
-            "Description: " + self.description + '\n' + \
-            "Fandoms: " + str( self.fandoms ) + '\n' + \
-            "Characters: " + str( self.characters ) + '\n' + \
-            "Relationships: " + str( self.relationships ) + '\n' + \
-            "Freeform Tags: " + str( self.freeformTags ) + '\n' + \
-            "Update Infos: " + str( self.updateDates ) + '\n' + \
-            "Flags: " + str( self.flags ) + '\n' + \
-            "StoryID: " + str( self.story_id ) + '\n' + \
-            "Num Words: " + str( self.words ) + '\n' + \
-            "Num Reviews: " + str( self.numReviews ) + '\n' + \
-            "Num Favorites: " + str( self.numFavorites ) + '\n' + \
-            "Num Follows: " + str( self.numFollows ) + '\n' + \
-            "Num Chapters: " + str( self.numChapters ) + '\n' + \
-            "Genres: " + str( self.genres ) + '\n' + \
-            "StorySource: " + self.storySource + '\n' + \
-            "ContentRating: " + self.contentRating + '\n'
+        # s = "Title: " + self.title + '\n' + \
+        #     "Author: " + self.author + " -> " + self.author_link + '\n' + \
+        #     "Description: " + self.description + '\n' + \
+        #     "Fandoms: " + str( self.fandoms ) + '\n' + \
+        #     "Characters: " + str( self.characters ) + '\n' + \
+        #     "Relationships: " + str( self.relationships ) + '\n' + \
+        #     "Freeform Tags: " + str( self.freeformTags ) + '\n' + \
+        #     "Update Infos: " + str( self.updateDates ) + '\n' + \
+        #     "Flags: " + str( self.flags ) + '\n' + \
+        #     "StoryID: " + str( self.story_id ) + '\n' + \
+        #     "Num Words: " + str( self.words ) + '\n' + \
+        #     "Num Reviews: " + str( self.numReviews ) + '\n' + \
+        #     "Num Favorites: " + str( self.numFavorites ) + '\n' + \
+        #     "Num Follows: " + str( self.numFollows ) + '\n' + \
+        #     "Num Chapters: " + str( self.numChapters ) + '\n' + \
+        #     "Genres: " + str( self.genres ) + '\n' + \
+        #     "StorySource: " + self.storySource + '\n' + \
+        #     "ContentRating: " + self.contentRating + '\n'
 
         #"Update Date: " + time.strftime( '%m/%d/%Y', time.localtime( self.updateDate ) ) + '\n'
         return s

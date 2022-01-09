@@ -85,6 +85,7 @@ void HandleClientRequests( size_t inClientSocket, char* data, int bytesReceived 
         LOG_ERR( "Command from client could not be processed, or was missing" );
     }
     //LOG( "Server recieved msg of cmd %u: '%s'", cmd, data );
+
     if ( cmd == UPDATE_OR_ADD_STORY )
     {
         ParsedStory pStory;
@@ -149,6 +150,8 @@ void HandleClientRequests( size_t inClientSocket, char* data, int bytesReceived 
         bool updated, needsChap1;
         db->AddOrUpdateStory( pStory, &updated, &needsChap1 );
         LOG( "Story %s (%u) updated: %u", pStory.title.c_str(), pStory.storyID, updated );
+        std::string sendMsg = updated ? "1" : "0";
+        CHECK_SEND_RESULT( send( clientSocket, sendMsg.c_str(), (int)sendMsg.length(), 0 ), UPDATE_OR_ADD_STORY );
     }
     else if ( cmd == REQUEST_LIST_OF_FANDOMS )
     {
@@ -286,7 +289,11 @@ int main()
     Logger_AddLogLocation( "log_serverCPP", "log_serverCPP.txt" );
 
     G_GetDatabase()->Load( ROOT_DIR "database/database" );
-    server::Init( HandleClientRequests );
+    if ( !server::Init( HandleClientRequests ) )
+    {
+        G_GetDatabase()->Shutdown();
+        return 0;
+    }
     StartPythonScraper();
 
     std::string cmd;

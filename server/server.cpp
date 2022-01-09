@@ -215,6 +215,7 @@ static void ListenForCommands()
             if ( s_clients[i].socket == INVALID_SOCKET )
             {
                 ++s_numClients;
+                //LOG( "Num clients: %u", s_numClients );
                 s_clients[i].isDone = false;
                 s_clients[i].socket = clientSocket;
                 s_clients[i].thread = std::thread( HandleClient, i );

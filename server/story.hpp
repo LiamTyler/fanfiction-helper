@@ -190,10 +190,10 @@ private:
     uint16_t authorLinkOffset;
     uint16_t descriptionOffset;
     uint16_t fandomsOffset;
-    uint16_t updatesOffset;
     uint16_t charactersOffset;
     uint16_t relationshipsOffset;
     uint16_t freeFormTagsOffset;
+    uint16_t updatesOffset;
 
     StoryFlags flags;
     uint32_t storyID;

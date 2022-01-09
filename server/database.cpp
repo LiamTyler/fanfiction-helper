@@ -190,6 +190,7 @@ StoryIndex Database::AddOrUpdateStory( const ParsedStory& pStory, bool* outShoul
         Story& story = stories[it->second];
         Story newStory = StoryFromParsedData( pStory );
 
+        // exclude update history from this list
         uint16_t data1Len = story.freeFormTagsOffset + story.data[story.freeFormTagsOffset] * sizeof( FreeformTagIndex );
         uint16_t data2Len = newStory.freeFormTagsOffset + newStory.data[newStory.freeFormTagsOffset] * sizeof( FreeformTagIndex );
         if ( data1Len != data2Len || memcmp( story.data.get(), newStory.data.get(), data1Len ) )

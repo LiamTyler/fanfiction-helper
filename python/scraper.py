@@ -1,17 +1,29 @@
 import requests
 import time
-from story_database import *
 import bs4
 import undetected_chromedriver.v2 as uc
 from filters import *
 import socket
 import os
+import threading
 
+g_shouldShutdown = False
 def ShouldShutdown():
-    return os.path.exists( "shutdown.txt" )
+    global g_shouldShutdown
+    if os.path.exists( "shutdown.txt" ):
+        g_shouldShutdown = True
+    return g_shouldShutdown
+
+# def ServerThreadHandler():
+#     sock = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
+#     sock.bind( ('127.0.0.1', 27016) )
+#     sock.listen( 5 )
+#     while True:
+#         connection, client_address = sock.accept()
+#         data = connection.recv( 4096 )
+#         connection.close()
 
 g_htmlScraper = None
-
 def GetHTMLPage( url ):
     global g_htmlScraper
     if not g_htmlScraper:
@@ -101,14 +113,11 @@ def ParseFFSearchPage( url, text ):
 
 def DownloadFFNetStories( baseUrl, maxPages=100000 ):
     #print( "Downloading stories..." )
-
-    HOST = '127.0.0.1'
-    PORT = 27015
-
+    global g_shouldShutdown
     beginUrl = baseUrl + "&p="
-
     page = 1
-    while page <= maxPages:
+    consecutiveNonUpdates = 0
+    while page <= maxPages and not ShouldShutdown() and consecutiveNonUpdates < 50:
         url = beginUrl + str( page )
         print( "Parsing page:", page, "/", maxPages )
         responseUrl, responseText = GetHTMLPage( url )
@@ -123,29 +132,55 @@ def DownloadFFNetStories( baseUrl, maxPages=100000 ):
         if len( newStories ) == 0:
             print( "Reached final page, done processing stories for URL:", baseUrl )
             break
-            
-        if ShouldShutdown():
-            break
 
         for story in newStories:
-            #print( "Sending Story:\n", story )
-            #print("\n")
+            #print( "Sending Story:\n", story, "\n" )
             data = EncodeNum( 1 ) + story.GetNetworkRepr()
             s = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
             if not s:
                 print( "Could not create socket" )
+                g_shouldShutdown = True
+                break
             else:
-                s.connect( (HOST, PORT) )
-                s.sendall( data )
-                    
+                try:
+                    s.connect( ('127.0.0.1', 27015) )
+                    s.sendall( data )
+                    data = s.recv( 64 ).decode()
+                    #print( "Return for story ", story, ": '", data, "', ", type( data ), " equals: ", data == "1", " ", len(data), sep='' )
+                    if data == "1":
+                        consecutiveNonUpdates = 0
+                    else:
+                        consecutiveNonUpdates += 1
+                except:
+                    print( "Failed to send/receive messages across socket for story", story )
+                    g_shouldShutdown = True
+                    break
+        print( "Consecutive:", consecutiveNonUpdates )
+            
         page += 1
 
 if __name__ == "__main__":
     print( "Python Scraper spawned" )
     print( "cwd: ", os.getcwd() )
-    f = open( "../../fandom_urls.txt" )
-    fandoms = f.readlines()
-    f.close()
+
+    path = "fandom_urls.txt"
+    for maxTries in range( 5 ):
+        if not os.path.exists( path ):
+            path = "../" + path
+        else:
+            break
+    f = None
+    fandoms = []
+    try:
+        f = open( path )
+        fandoms = f.readlines()
+        f.close()
+    except:
+        print( "Could not read the fandoms_url file:", path, ". Closing" )
+        exit()
+    
+    # serverThread = threading.Thread( target=ServerThreadHandler )
+    # serverThread.start()
     for fandom in fandoms:
         f = fandom.strip()
         print( "Scraping:", f )
